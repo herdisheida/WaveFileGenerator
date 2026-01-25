@@ -24,7 +24,7 @@ void addSample(int wave, int sample) {
 }
 
 
-int *writeLittleEndian(int byteSize, int* ptr) {
+void writeInLittleEndian(unsigned char* out, int byteSize, const void* numberPtr) {
     // TODO
 }
 
