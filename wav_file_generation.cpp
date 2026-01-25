@@ -143,7 +143,7 @@ int main() {
 
     // add frequency samples
     for (unsigned int i = 0; i < numSamples; ++i) {
-        double s = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int)(s * 32767.0); // -32768 to 32767.
         addSample16LE(outFile, sample);
     }
