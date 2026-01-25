@@ -26,6 +26,18 @@ void addSample(int wave, int sample) {
 
 void writeInLittleEndian(unsigned char* out, int byteSize, const void* numberPtr) {
     // TODO
+    (void) out;
+    (void) byteSize;
+    (void) numberPtr;
+
+    if (!out || !numberPtr || byteSize <= 0) return;
+
+    // if (byteSize == 1) out = &numberPtr;
+
+    // for (int i = 0; i < byteSize; i++) {
+    //     out[i] = &numberPtr[byteSize];
+    //     byteSize--;
+    // }
 }
 
 
