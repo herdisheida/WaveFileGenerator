@@ -23,6 +23,9 @@ void addSample(int wave, int sample) {
 }
 
 
+int *writeLittleEndian(int byteSize, int* ptr) {
+    // TODO
+}
 
 int main() {
    int sampleRate = 44100;      // Sample rate in Hz. (CD quality)
