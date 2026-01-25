@@ -97,11 +97,13 @@ static void makeWaveHeader(
 
 
 void addSample(int wave, int sample) {
-   int sample_16 = (int) (sample * 32767);
+    (void) wave;
+    (void) sample;
+//    int sample_16 = (int) (sample * 32767);
 //    data = struct.pack('<h', sample_16);
 //    wave.extend(data)
+// TODO
 }
-
 
 
 
