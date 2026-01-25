@@ -10,6 +10,7 @@
 // Note that you don’t have to write everything to the file at once.  You can reuse a static array and write a large file in chunks.  Also note that in this program your arrays may actually be enormous compared to the data in assignments you have done previously in programming courses.
 
 
+
 static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     /* write unsigned value of size byteSize as little endinan
         return that value in out */
@@ -96,47 +97,59 @@ static void makeWaveHeader(
 
 
 
-void addSample(int wave, int sample) {
-    (void) wave;
-    (void) sample;
-//    int sample_16 = (int) (sample * 32767);
-//    data = struct.pack('<h', sample_16);
-//    wave.extend(data)
-// TODO
-}
+static void addSample16LE(std::ofstream& outFile, int sample) {
+    /*
+        Writes a single 16-bit PCM audio sample to a file in little-endian format
 
+        The input sample is expected to be a signed integer in the range [-32768, 32767].
+        The value is clamped to this range, converted to its raw 16-bit representation,
+        and written as two bytes (16 bits = short) (LSB first).
+    */
+
+    // clamp
+    if (sample > 32767) sample = 32767;
+    if (sample < -32768) sample = -32768;
+
+    // interpret the signed value as raw 16-bit data
+    unsigned short raw16 = (unsigned short) sample;
+
+    // write sample as little-endian bytes
+    unsigned char sampleBytes[2];
+    writeUIntLE(sampleBytes, (unsigned int) raw16, 2);
+    outFile.write((const char*) sampleBytes, 2);
+}
 
 
 
 int main() {
     unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
-    unsigned short channels = 1;        // // Mono
+    unsigned short channels = 1;        // Mono
     unsigned short bits = 16;           // bits per sample
+
     double durationSeconds = 0.5;       // Length of tone
     unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
 
-    unsigned char header[44];
+    const int freq = 440;
+    const double PI = 3.14159265358979323846;
 
+    // WAV PCM Header is 44 bytes
+    unsigned char header[44];
     makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
-    std::ofstream outFile("example.wav", std::ios::binary);
+    std::ofstream outFile("cpp-example.wav", std::ios::binary);
     outFile.write((const char*) header, 44);
-
-
     
 
-    // Add frequency samples
-    // for (int i = 0; i < noSamples; i++) {
-    //     float sample = std::cos(freq * i * 3.142 / sampleRate); 
-    //     addSample(wave, sample);
-    // }
 
-
-
-
-    // then write sample data (2 bytes each for 16-bit mono)
-    // ...
+    // add frequency samples
+    for (unsigned int i = 0; i < numSamples; ++i) {
+        double s = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        int sample = (int)(s * 32767.0); // -32768 to 32767.
+        addSample16LE(outFile, sample);
+    }
 
     
     outFile.close();
+    std::cout << "WAVE file written to cpp-example.wav\n";
+    return 0;
 }
