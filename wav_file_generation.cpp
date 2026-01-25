@@ -10,7 +10,7 @@
 // Note that you don’t have to write everything to the file at once.  You can reuse a static array and write a large file in chunks.  Also note that in this program your arrays may actually be enormous compared to the data in assignments you have done previously in programming courses.
 
 
-void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
+static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     /* write unsigned value of size byteSize as little endinan
         return that value in out */
     for (int i = 0; i < byteSize; ++i) {
