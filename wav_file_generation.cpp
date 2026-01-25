@@ -9,6 +9,7 @@
 
 // Note that you don’t have to write everything to the file at once.  You can reuse a static array and write a large file in chunks.  Also note that in this program your arrays may actually be enormous compared to the data in assignments you have done previously in programming courses.
 
+
 int makeWaveHeader(int sampleRate, int oChannels, int bitsSample) {
 
     int wave;
@@ -26,6 +27,8 @@ void addSample(int wave, int sample) {
 int *writeLittleEndian(int byteSize, int* ptr) {
     // TODO
 }
+
+
 
 int main() {
    int sampleRate = 44100;      // Sample rate in Hz. (CD quality)
