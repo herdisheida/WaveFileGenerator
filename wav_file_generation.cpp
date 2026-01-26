@@ -3,6 +3,7 @@
 #include <fstream>  // for files
 #include <iostream>
 #include <cctype>   // isdigit
+#include <cstdlib>  // atoi, atof
 
 
 static void buildWavFilename(char outName[37], const char baseName[33]) {
@@ -124,70 +125,6 @@ static void addSample16LE(std::ofstream& outFile, int sample) {
 }
 
 
-
-
-bool isInt(const char* s) {
-    // only digits
-
-    if (*s == '\0') {
-        return true;
-    }
-    for (int i = 0; s[i]; i++) {
-        if (!isdigit(s[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool isDouble(const char* s) {
-    // contains a dot
-
-    bool dotFound = false;
-
-    for (int i = 0; s[i]; i++) {
-        if (s[i] == '.') {
-
-            if (dotFound) {
-                // 2 dots
-                return false;
-            }
-            dotFound = true;
-        } else if (!isdigit(s[i])) {
-            return false;
-        }
-    }
-    return dotFound;
-}
-
-bool validateTerminalArgs(int argc, char *argv[]) {
-    /* 
-        Running the program on the terminal has to have three arguments,
-        a string, an integer and a real number
-    */
-    if (argc != 4) {
-        return false;
-    }
-
-    int hasStr = false;
-    int hasInt = false;
-    int hasReal = false;
-
-    for (int i = 1; i < argc; i++) {
-        if (isInt(argv[i])) {
-            hasInt = true;
-        } else if (isDouble(argv[i])) {
-            hasReal = true;
-        } else {
-            hasStr = true;
-        }
-    }
-
-    if (hasStr && hasInt && hasReal) {
-        return true;
-    }
-    return false;
-}
 
 
 int main(int argc, char *argv[]) {
