@@ -160,6 +160,9 @@ int main(int argc, char *argv[]) {
     if (durationSeconds < 0.0) durationSeconds = 0.0;
     if (durationSeconds > 20.0) durationSeconds = 20.0;
     
+    // build output wave filename
+    char outName[37];
+    buildWavFilename(outName, baseName);
 
     // build header
     unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
