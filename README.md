@@ -12,14 +12,6 @@
 clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ```
 
-
-
-2. Run program
-``` bash
-    ./program
-```
-
-
 2. Run program
 
 |                | No arguments | With arguments                                                                                                                                    |
