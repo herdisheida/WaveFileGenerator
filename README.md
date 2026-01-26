@@ -33,10 +33,10 @@ clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ``` bash
     ./program test_sound 440 0.5
 ```
-| Run program | Run program with arguments                                                                                                                                           |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ./program   | **Arguments:**<br>1. waveFilename: filename up to 32 chars (do not include .wav)<br>2. frequency: Hz sound frequency (INT)<br>3. duration: seconds (double)<br>      |
-|             | **Examples:**<br>./program <waveFilename> <frequency> <duration><br>./program test_sound 440 0.5                                                                     |
+|                | Run program | Run program with arguments                                                                                                                                           |
+| -------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Arguments:** |             | 1. waveFilename: filename up to 32 chars (do not include .wav)<br>2. frequency: Hz sound frequency (INT)<br>3. duration: seconds (double)<br>                        |
+| **Examples:**  | ./program   | ./program <waveFilename> <frequency> <duration><br>./program test_sound 440 0.5                                                                                      |
 
 
 ## Anything else a stundent wishes to say (Canvas comments will not be delivered to the graders)
