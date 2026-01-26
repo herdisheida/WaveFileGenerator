@@ -16,7 +16,7 @@ static void buildWavFilename(char outName[37], const char baseName[33]) {
 
 static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     /*
-        Converts a sequence of bytes to little-endian format.
+        Writes the lowest byteSize bytes of value into out in little-endian order
     */
     for (int i = 0; i < byteSize; ++i) {
         out[i] = (unsigned char)(value & 0xFF);
@@ -103,7 +103,7 @@ static void makeWaveHeader(
 
 static void addSample16LE(std::ofstream& outFile, int sample) {
     /*
-        Writes a single 16-bit PCM audio sample to a file in little-endian format
+        Writes a single 16-bit PCM audio sample to a file in little-endian order
 
         The input sample is expected to be a signed integer in the range [-32768, 32767].
         The value is clamped to this range, converted to its raw 16-bit representation,
