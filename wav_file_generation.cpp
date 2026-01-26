@@ -8,7 +8,8 @@
 
 static void buildWavFilename(char outName[37], const char baseName[33]) {
     /* 
-        outName stores up to 32 letters + 4 (.wave) + 1 ('\0') = 37
+        outName stores up to 32 chars + 4 (.wave) + 1 ('\0') = 37
+        baseName stores max 32 chars + '\0'
     */
     std::strcpy(outName, baseName);
     std::strcat(outName, ".wav"); // TODO - don't know if i can use strcat()
@@ -128,21 +129,40 @@ static void addSample16LE(std::ofstream& outFile, int sample) {
 
 
 int main(int argc, char *argv[]) {
-    // bool useTerminalArgs = validateTerminalArgs(argc, argv);
-    // if (!useTerminalArgs) { get_usr_input(); }
-
     unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
     unsigned short channels = 1;        // Mono
     unsigned short bits = 16;           // bits per sample
 
+    char baseName[33];                  // wave file name
+    int freq = 440;                     // Hz
     double durationSeconds = 0.5;       // Length of tone
-    unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
 
-    const int freq = 440;
-    const double PI = 3.14159265358979323846;
 
+    if (argc >= 4) {
+        // commant line args
+        std::strncpy(baseName, argv[1], 32);
+        baseName[32] = '\0';
+
+        freq = std::atoi(argv[2]);
+        durationSeconds = std::atof(argv[3]);
+    } else {
+        // ask usr for args
+        std::cout << "Output filename (no spaces, max 32 chars): ";
+        std::cin >> baseName;
+
+        std::cout << "Frequency (integer Hz): ";
+        std::cin >> freq;
+
+        std::cout << "Duration (seconds): ";
+        std::cin >> durationSeconds;
+    }
+    // clamp duration
+    if (durationSeconds < 0.0) durationSeconds = 0.0;
+    if (durationSeconds > 20.0) durationSeconds = 20.0;
+    
 
     // build header
+    unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
     unsigned char header[44];
     makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
@@ -156,6 +176,7 @@ int main(int argc, char *argv[]) {
     
 
     // write samples (frequency)
+    const double PI = 3.14159265358979323846;
     for (unsigned int i = 0; i < numSamples; ++i) {
         double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int)(s * 32767.0); // -32768 to 32767.
