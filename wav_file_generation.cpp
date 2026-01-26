@@ -128,9 +128,9 @@ static void addSample16LE(std::ofstream& outFile, int sample) {
 
 
 int main(int argc, char *argv[]) {
-    unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
-    unsigned short channels = 1;        // Mono
-    unsigned short bits = 16;           // bits per sample
+    const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
+    const unsigned short channels = 1;        // Mono
+    const unsigned short bits = 16;           // bits per sample
 
     char baseName[33];                  // wave file name
     int freq = 440;                     // Hz
