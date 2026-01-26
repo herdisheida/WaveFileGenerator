@@ -20,23 +20,12 @@ clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ```
 
 
-2. to run program with arguments
-    1. waveFilename: filename up to 32 chars (do not include .war)
-    2. frequency: Hz sound frequency (INT)
-    3. duration: seconds (double)
+2. Run program
 
-- EXAMPLES:
-``` bash
-    ./program <waveFilename> <frequency> <duration>
-```
-
-``` bash
-    ./program test_sound 440 0.5
-```
-|                | Run program | Run program with arguments                                                                                                                                           |
-| -------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Arguments:** |             | 1. waveFilename: filename up to 32 chars (do not include .wav)<br>2. frequency: Hz sound frequency (INT)<br>3. duration: seconds (double)<br>                        |
-| **Examples:**  | ./program   | ./program <waveFilename> <frequency> <duration><br>./program test_sound 440 0.5                                                                                      |
+|                | No arguments | With arguments                                                                                                                                    |
+| -------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Arguments:** |              | 1. generatedFilename: 32 chars (do not include .wav)<br>2. frequency: Hz sound frequency (INT)<br>3. duration: seconds (double)<br>           |
+| **Examples:**  | ./program    | ./program _generatedFilename_ _frequency_ _duration_ <br>./program test_sound 440 0.5                                                         |
 
 
 ## Anything else a stundent wishes to say (Canvas comments will not be delivered to the graders)
