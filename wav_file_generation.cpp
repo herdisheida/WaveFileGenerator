@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
     // write file
-    std::ofstream outFile("cpp-example.wav", std::ios::binary);
+    std::ofstream outFile(outName, std::ios::binary);
     if (!outFile) {
         std::cout << "Could not open/create output file.\n";
         return 1;
@@ -188,6 +188,6 @@ int main(int argc, char *argv[]) {
 
     
     outFile.close();
-    std::cout << "WAVE file written to cpp-example.wav\n";
+    std::cout << "WAVE file written to " << outName << '\n';
     return 0;
 }
