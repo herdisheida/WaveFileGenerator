@@ -2,6 +2,16 @@
 #include <cstring>  // strcmp, strcpy and strlen
 #include <fstream>  // for files
 #include <iostream>
+#include <cctype>   // isdigit
+
+
+static void buildWavFilename(char outName[37], const char baseName[33]) {
+    /* 
+        outName stores up to 32 letters + 4 (.wave) + 1 ('\0') = 37
+    */
+    std::strcpy(outName, baseName);
+    std::strcat(outName, ".wav"); // TODO - don't know if i can use strcat()
+}
 
 
 static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
@@ -115,7 +125,75 @@ static void addSample16LE(std::ofstream& outFile, int sample) {
 
 
 
-int main() {
+
+bool isInt(const char* s) {
+    // only digits
+
+    if (*s == '\0') {
+        return true;
+    }
+    for (int i = 0; s[i]; i++) {
+        if (!isdigit(s[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isDouble(const char* s) {
+    // contains a dot
+
+    bool dotFound = false;
+
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == '.') {
+
+            if (dotFound) {
+                // 2 dots
+                return false;
+            }
+            dotFound = true;
+        } else if (!isdigit(s[i])) {
+            return false;
+        }
+    }
+    return dotFound;
+}
+
+bool validateTerminalArgs(int argc, char *argv[]) {
+    /* 
+        Running the program on the terminal has to have three arguments,
+        a string, an integer and a real number
+    */
+    if (argc != 4) {
+        return false;
+    }
+
+    int hasStr = false;
+    int hasInt = false;
+    int hasReal = false;
+
+    for (int i = 1; i < argc; i++) {
+        if (isInt(argv[i])) {
+            hasInt = true;
+        } else if (isDouble(argv[i])) {
+            hasReal = true;
+        } else {
+            hasStr = true;
+        }
+    }
+
+    if (hasStr && hasInt && hasReal) {
+        return true;
+    }
+    return false;
+}
+
+
+int main(int argc, char *argv[]) {
+    // bool useTerminalArgs = validateTerminalArgs(argc, argv);
+    // if (!useTerminalArgs) { get_usr_input(); }
+
     unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
     unsigned short channels = 1;        // Mono
     unsigned short bits = 16;           // bits per sample
