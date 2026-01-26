@@ -12,7 +12,7 @@
 clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ```
 
-<div>
+<div style="display: grid; grid-template-columns: auto auto">
     <div>
         2. Run program
         ``` bash
