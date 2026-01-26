@@ -11,20 +11,24 @@
 ``` bash
 clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ```
-
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
 <div>
+
 2. Run program
 ``` bash
     ./program
 ```
+
 </div>
+
 <div>
+
 2. to run program with arguments
     1. waveFilename: filename up to 32 chars (do not include .war)
     2. frequency: Hz sound frequency (INT)
     3. duration: seconds (double)
 
-- EXAMPLES:
+- Examples:
 ``` bash
     ./program <waveFilename> <frequency> <duration>
 ```
@@ -32,6 +36,9 @@ clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ``` bash
     ./program test_sound 440 0.5
 ```
+
+</div>
+
 </div>
 
 ## Anything else a stundent wishes to say (Canvas comments will not be delivered to the graders)
