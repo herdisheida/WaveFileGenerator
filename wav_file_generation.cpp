@@ -1,8 +1,7 @@
 #include <cmath>    // calcualte sine wave
 #include <cstring>  // strcmp, strcpy and strlen
 #include <fstream>  // for files
-#include <iostream>
-#include <cctype>   // isdigit
+#include <iostream> // cout, cin
 #include <cstdlib>  // atoi, atof
 
 
