@@ -204,16 +204,21 @@ int main(int argc, char *argv[]) {
     const int freq = 440;
     const double PI = 3.14159265358979323846;
 
-    // WAV PCM Header is 44 bytes
+
+    // build header
     unsigned char header[44];
     makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
+    // write file
     std::ofstream outFile("cpp-example.wav", std::ios::binary);
+    if (!outFile) {
+        std::cout << "Could not open/create output file.\n";
+        return 1;
+    }
     outFile.write((const char*) header, 44);
     
 
-
-    // add frequency samples
+    // write samples (frequency)
     for (unsigned int i = 0; i < numSamples; ++i) {
         double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int)(s * 32767.0); // -32768 to 32767.
