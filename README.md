@@ -2,10 +2,30 @@
 **Herdís Heiða Jing Guðjohnsen**
 
 
-## What version of the asignment was solved and should be graded
+<!-- table of content -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#Version">Version</a>
+    </li>
+    <li>
+        <a href="#How-to-run">How to run</a>
+    </li>
+    <li>
+        <a href="#Anything-else">Anything else</a>
+    </li>
+  </ol>
+</details>
+
+<br>
+<hr>
+<!-- STUFF -->
+
+### Version
 `Version B`
 
-## What needs to be written in the terminal to compile and run the program
+### How to run
     
 1. Compile program
 ``` bash
@@ -20,6 +40,6 @@ clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 | **Examples:**  | `./program`  | `./program <generatedFilename> <frequency> <duration>` <br> `./program test_sound 440 0.5`                                               |
 
 
-## Anything else a stundent wishes to say (Canvas comments will not be delivered to the graders)
+### Anything else
 
 GUD LUCK
