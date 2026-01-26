@@ -8,14 +8,23 @@ README.md (or README.txt) in which is
 
 2. What needs to be written in the terminal to compile and run the program
     
-    clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
-    ./program 
+    - compile program
 
-    to run with 3 arguments
-        // argv[0] = program name
-        // argv[1] = file base name
-        // argv[2] = frequency (int)
-        // argv[3] = duration (double)
+        clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
+
+    - to run program
+
+        ./program
+
+
+    - to run program with arguments
+        1. waveFilename: filename up to 32 chars (do not include .war)
+        2. frequency: Hz sound frequency (INT)
+        3. duration: seconds (double)
+
+        ./program <waveFilename> <frequency> <duration>
+        
+        ./program test_sound 440 0.5
 
 3. Anything else a stundent wishes to say (Canvas comments will not be delivered to the graders)
 
