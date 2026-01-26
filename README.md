@@ -3,7 +3,7 @@
 
 
 ## What version of the asignment was solved and should be graded
-    `Version B`
+`Version B`
 
 ## What needs to be written in the terminal to compile and run the program
     
