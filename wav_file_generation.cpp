@@ -146,7 +146,6 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
     }
     // skip tokens
     char ignoreName[33];
-    int fileBpm = 0;
     musicFile >> ignoreName;
     musicFile >> bpm;
 
