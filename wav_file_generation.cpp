@@ -151,7 +151,7 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
 }
 
 static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
-        /*
+    /*
         Read music note text file, calculate total samples from each note
 
         format:
@@ -166,7 +166,7 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
 
 
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
-            /*
+    /*
         Read music note text file, write song sample from each note
 
         format:
