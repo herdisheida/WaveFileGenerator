@@ -235,6 +235,29 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
 }
 
 
+
+
+static double freqTableOctaveOne(char note) {
+    // lowercase = base note
+    // uppercase = sharp
+    switch (note) {
+        case 'a': return 440.0;
+        case 'A': return 466.0;
+        case 'b': return 494.0;
+        case 'c': return 523.0;  // also B
+        case 'C': return 554.0;
+        case 'd': return 587.0;
+        case 'D': return 622.0;
+        case 'e': return 659.0;
+        case 'f': return 698.0;  // also E
+        case 'F': return 740.0;
+        case 'g': return 784.0;
+        case 'G': return 831.0;
+        default:  return 0.0;
+    }
+}
+
+
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
     /*
         Reads the song text file and write song sample for each note
