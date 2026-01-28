@@ -105,7 +105,7 @@ static void makeWaveHeader(
 
 static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /*
-        Read music note text file,
+        Reads the song text file,
         get wav file name and bpm
 
         format:
@@ -125,21 +125,29 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
 
 static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
     /*
-        Read music note text file, calculate total samples from each note
+        Reads the song text file and returns total number of audio samples.
 
-        format:
-            ...
-            ...
+        File format:
+            line 1: output wav base name (string, no spaces)
+            line 2: tempo in BPM (int)
+            
+            remaining lines:
+                note octave numerator denominator
+            or silence:
+                s numerator denominator
 
-            char int-octave int-numerator int-denominator
-                or
-            char int1 int2 = silence for int2/int1 many beats
+        Note: One beat is a quarter note.
+              beats = 4 * numerator/denominator
+              seconds = beats * (60 / bpm)
+              samples = seconds * sampleRate
     */
     std::ifstream musicFile(textFilename);
     if (!musicFile) {
         std::cout << "Unable to open file: " << textFilename << "\n";
         return false;
     }
+    
+    musicFile.seekg(22);
 
 
 }
@@ -170,7 +178,7 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
 
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
     /*
-        Read music note text file, write song sample from each note
+        Reads the song text file, write song sample from each note
 
         format:
             ...
@@ -226,7 +234,8 @@ int main(int argc, char *argv[]) {
 
 
     // build header
-    // unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate); // TODO delete (need to calculate this for version c)
+    //  // TODO delete (need to calculate this for version c)
+    // unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
     // unsigned char header[44];
     // makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
@@ -238,7 +247,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     waveFile.write((const char*) header, 44);
-    
+
 
     // write samples (frequency)
     const double PI = 3.14159265358979323846;
