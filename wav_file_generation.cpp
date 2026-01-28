@@ -198,7 +198,7 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
         // beats = 4 * num/den (since 1/4 note = 1 beat)
         double beats = 4.0 * (double) num / (double) den;
 
-        // seconds for this event
+        // seconds for this event (sec / bpm = sec per beat)
         double seconds = beats * (60.0 / (double) bpm);
 
         if (seconds < 0.0) seconds = 0.0;
