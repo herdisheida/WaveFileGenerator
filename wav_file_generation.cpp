@@ -142,11 +142,6 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
 
     musicFile >> baseName;   // first token
     musicFile >> bpm;        // second token
-
-    if (!musicFile) {
-        std::cout << "Bad file format (missing name or BPM)" << "\n";
-        return false;
-    }
     return true;
 }
 
@@ -162,6 +157,13 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
                 or
             char int1 int2 = silence for int2/int1 many beats
     */
+    std::ifstream musicFile(textFilename);
+    if (!musicFile) {
+        std::cout << "Unable to open file: " << textFilename << "\n";
+        return false;
+    }
+
+
 }
 
 
@@ -177,6 +179,11 @@ static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sam
                 or
             char int1 int2 = silence for int2/int1 many beats
     */
+    std::ifstream musicFile(textFilename);
+    if (!musicFile) {
+        std::cout << "Unable to open file: " << textFilename << "\n";
+        return false;
+    }
 }
 
 
