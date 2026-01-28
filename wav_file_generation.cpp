@@ -19,7 +19,7 @@ static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     /*
         Writes the lowest byteSize bytes of value into out in little-endian order
     */
-    for (int i = 0; i < byteSize; ++i) {
+    for (int i = 0; i < byteSize; i++) {
         out[i] = (unsigned char)(value & 0xFF);
         value >>= 8;
     }
@@ -238,9 +238,9 @@ static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int 
 
      const double PI = 3.14159265358979323846;
 
-    for (unsigned int i = 0; i < numSamples; ++i) {
-        double s = std::cos(2.0 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
-        int sample = (int)(s * 32767.0); // -32768 to 32767.
+    for (unsigned int i = 0; i < numSamples; i++) {
+        double s = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        int sample = (int) (s * 32767.0); // -32768 to 32767.
         addSampleLE(waveFile, sample);
     }
 }
@@ -294,7 +294,7 @@ static double noteFrequency(char note, int octave) {
 
 static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
     // silence in 16-bit PCM is sample value 0
-    for (unsigned int i = 0; i < count; ++i) {
+    for (unsigned int i = 0; i < count; i++) {
         addSampleLE(waveFile, 0);
     }
 }
