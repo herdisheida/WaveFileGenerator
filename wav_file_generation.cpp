@@ -144,10 +144,10 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
         std::cout << "Unable to open file: " << textFilename << "\n";
         return false;
     }
-    
-    // read first two lines
-    char outBaseName[33];
-    musicFile >> outBaseName;  // ignore, just consume
+    // skip tokens
+    char ignoreName[33];
+    int fileBpm = 0;
+    musicFile >> ignoreName;
     musicFile >> bpm;
 
 
@@ -260,11 +260,12 @@ static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sam
         std::cout << "Unable to open file: " << textFilename << "\n";
         return false;
     }
-    
-    // read first two lines
-    char outBaseName[33];
-    musicFile >> outBaseName;  // ignore, just consume
+    // skip tokens
+    char ignoreName[33];
+    int fileBpm = 0;
+    musicFile >> ignoreName;
     musicFile >> bpm;
+
 
 
 
