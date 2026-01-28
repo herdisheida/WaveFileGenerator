@@ -122,7 +122,7 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
 
     if (bpm <= 0) {
         std::cout << "Incorrect file header (missing name or BPM <= 0)\n";
-        return 0;
+        return false;
     }
 
     return true;
@@ -135,9 +135,9 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
 
         File format:
             remaining lines:
-                note octave numerator denominator
+                note octave num den
             or silence:
-                s numerator denominator
+                s num den
     */
     std::ifstream musicFile(textFilename);
     if (!musicFile) {
@@ -153,18 +153,17 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
 
     unsigned int totalSamples = 0;
 
-    // read notes, either: "s num den" or "note octave num den"
+    // read until EOF
     while (true) {
         char noteChar;
-        if (!(musicFile >> noteChar)) break; // no more tokens
+        if (!(musicFile >> noteChar)) break; // no more notes
 
-        int octaveOrNum = 0;
         int num = 0;
         int den = 0;
 
         if (noteChar == 's') {
 
-            // silence line: s numerator denominator
+            // silence line: s <num> <den>
             if (!(musicFile >> num >> den)) {
                 std::cout << "Incorrect silence line in file" << "\n";
                 return 0;
@@ -172,7 +171,7 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
 
         } else {
 
-            // note line: note octave numerator denominator
+            // note line: note octave num den
             int octave = 0;
             if (!(musicFile >> octave >> num >> den)) {
                 std::cout << "Incorrect note line in file" << "\n";
@@ -183,7 +182,7 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
         }
 
         if (den == 0) {
-            std::cout << "Invalid note length: denominator is 0" << "\n";
+            std::cout << "Invalid note length: den is 0" << "\n";
             return 0;
         }
 
@@ -227,7 +226,26 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
     waveFile.write((const char*) sampleBytes, 2);
 }
 
+static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int numSamples, unsigned int sampleRate) {
+    // generate samples of a cosine wave at frequency
+    const double PI = 3.14159265358979323846;
 
+    for (unsigned int i = 0; i < numSamples; ++i) {
+        double s = std::cos(2.0 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        int sample = (int)(s * 32767.0); // -32768 to 32767.
+        addSample16LE(waveFile, sample);
+    }
+}
+
+static double noteFrequency(char note, int octave) {
+}
+
+static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
+    // silence in 16-bit PCM is sample value 0
+    for (unsigned int i = 0; i < count; ++i) {
+        addSample16LE(waveFile, 0);
+    }
+}
 
 
 static double freqTableOctaveOne(char note) {
@@ -250,6 +268,8 @@ static double freqTableOctaveOne(char note) {
     }
 }
 
+static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sampleRate) {
+}
 
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
     /*
@@ -260,49 +280,52 @@ static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sam
         std::cout << "Unable to open file: " << textFilename << "\n";
         return false;
     }
-    // skip tokens
+    // skip token
     char ignoreName[33];
-    int fileBpm = 0;
     musicFile >> ignoreName;
+
     musicFile >> bpm;
 
 
-
-
-    // read notes, either: "s num den" or "note octave num den"
+    // read until EOF
     while (true) {
         char noteChar;
-        if (!(musicFile >> noteChar)) break; // no more tokens
+        if (!(musicFile >> noteChar)) break; // no more notes
 
-        int octaveOrNum = 0;
         int num = 0;
         int den = 0;
 
         if (noteChar == 's') {
 
-            // silence line: s numerator denominator
+            // silence line: s <num> <den>
             if (!(musicFile >> num >> den)) {
                 std::cout << "Incorrect silence line in file" << "\n";
                 return 0;
             }
+            unsigned int numSamples = durationToSamples(num, den, bpm, sampleRate);
+            writeSilenceSamples(waveFile, numSamples);
 
         } else {
 
-            // note line: note octave numerator denominator
+            // note: <note> <octave> <num> <den>
             int octave = 0;
             if (!(musicFile >> octave >> num >> den)) {
-                std::cout << "Incorrect note line in file" << "\n";
+                std:: cout << "Incorrect note line in file" << "\n";
                 return 0;
             }
-            (void) octave; // not needed for sample count
 
-        }
+            double freq = noteFrequency(noteChar, octave);
+            if (freq <= 0.0) {
+                std::cout << "Unknown note character: " << noteChar << "\n";
+                return 0;
+            }
 
-        if (den == 0) {
-            std::cout << "Invalid note length: denominator is 0" << "\n";
-            return 0;
+            unsigned int count = durationToSamples(num, den, bpm, sampleRate);
+            writeToneSamples(waveFile, freq, count, sampleRate);
         }
     }
+
+    return 1; // success
 }
 
 
@@ -345,13 +368,6 @@ int main(int argc, char *argv[]) {
     waveFile.write((const char*) header, 44);
 
 
-    // write samples (frequency)
-    const double PI = 3.14159265358979323846;
-    // for (unsigned int i = 0; i < numSamples; ++i) {
-    //     double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
-    //     int sample = (int)(s * 32767.0); // -32768 to 32767.
-    //     addSample16LE(waveFile, sample);
-    // }
 
     writeSongSamples(argv[1], bpm, sampleRate, waveFile);
 
