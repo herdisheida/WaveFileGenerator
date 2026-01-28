@@ -149,7 +149,6 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
     musicFile >> ignoreName;
     musicFile >> bpm;
 
-
     unsigned int totalSamples = 0;
 
     // read until EOF
@@ -198,6 +197,8 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
 
         totalSamples += samples;
     }
+
+    return totalSamples;
 }
 
 
