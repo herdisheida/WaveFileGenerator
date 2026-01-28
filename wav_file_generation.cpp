@@ -189,7 +189,7 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
     musicFile >> ignoreName;
     musicFile >> bpm;
     if (!musicFile || bpm <= 0) {
-        std::cout << "Bad file header (missing name or bpm)\n";
+        std::cout << "Bad file header (missing name or bpm)" << '\n';
         return false;
     }
 
