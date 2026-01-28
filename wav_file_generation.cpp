@@ -258,6 +258,48 @@ static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sam
         std::cout << "Unable to open file: " << textFilename << "\n";
         return false;
     }
+    
+    // read first two lines
+    char outBaseName[33];
+    musicFile >> outBaseName;  // ignore, just consume
+    musicFile >> bpm;
+
+
+
+    // read notes, either: "s num den" or "note octave num den"
+    while (true) {
+        char noteChar;
+        if (!(musicFile >> noteChar)) break; // no more tokens
+
+        int octaveOrNum = 0;
+        int num = 0;
+        int den = 0;
+
+        if (noteChar == 's') {
+
+            // silence line: s numerator denominator
+            if (!(musicFile >> num >> den)) {
+                std::cout << "Incorrect silence line in file" << "\n";
+                return 0;
+            }
+
+        } else {
+
+            // note line: note octave numerator denominator
+            int octave = 0;
+            if (!(musicFile >> octave >> num >> den)) {
+                std::cout << "Incorrect note line in file" << "\n";
+                return 0;
+            }
+            (void) octave; // not needed for sample count
+
+        }
+
+        if (den == 0) {
+            std::cout << "Invalid note length: denominator is 0" << "\n";
+            return 0;
+        }
+    }
 }
 
 
