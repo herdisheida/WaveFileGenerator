@@ -102,28 +102,6 @@ static void makeWaveHeader(
 
 
 
-static void addSample16LE(std::ofstream& waveFile, int sample) {
-    /*
-        Writes a single 16-bit PCM audio sample to a file in little-endian order
-
-        The input sample is expected to be a signed integer in the range [-32768, 32767].
-        The value is clamped to this range, converted to its raw 16-bit representation,
-        and written as two bytes (16 bits = short) (LSB first).
-    */
-
-    // clamp
-    if (sample > 32767) sample = 32767;
-    if (sample < -32768) sample = -32768;
-
-    // interpret the signed value as raw 16-bit data
-    unsigned short raw16 = (unsigned short) sample;
-
-    // write sample as little-endian bytes
-    unsigned char sampleBytes[2];
-    writeUIntLE(sampleBytes, (unsigned int) raw16, 2);
-    waveFile.write((const char*) sampleBytes, 2);
-}
-
 
 static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /*
@@ -164,6 +142,29 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
     }
 
 
+}
+
+
+static void addSample16LE(std::ofstream& waveFile, int sample) {
+    /*
+        Writes a single 16-bit PCM audio sample to a file in little-endian order
+
+        The input sample is expected to be a signed integer in the range [-32768, 32767].
+        The value is clamped to this range, converted to its raw 16-bit representation,
+        and written as two bytes (16 bits = short) (LSB first).
+    */
+
+    // clamp
+    if (sample > 32767) sample = 32767;
+    if (sample < -32768) sample = -32768;
+
+    // interpret the signed value as raw 16-bit data
+    unsigned short raw16 = (unsigned short) sample;
+
+    // write sample as little-endian bytes
+    unsigned char sampleBytes[2];
+    writeUIntLE(sampleBytes, (unsigned int) raw16, 2);
+    waveFile.write((const char*) sampleBytes, 2);
 }
 
 
