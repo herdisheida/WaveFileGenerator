@@ -158,6 +158,11 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
 }
 
 
+static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
+}
+
+
+
 int main(int argc, char *argv[]) {
     const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
     const unsigned short channels = 1;        // Mono
@@ -178,7 +183,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    // char baseName[33];                  // wave file name
+    // char baseName[33];                  // wave file name // TODO DELETE i think -- i get frequency from the notes in the txt file and duration from the sum of note lengths
     // int freq = 440;                     // Hz
     // double durationSeconds = 0.5;       // Length of tone
 
@@ -199,7 +204,8 @@ int main(int argc, char *argv[]) {
     // unsigned char header[44];
     // makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
-    // write file
+
+    // write header
     std::ofstream waveFile(outName, std::ios::binary);
     if (!waveFile) {
         std::cout << "Could not open/create output file.\n";
@@ -210,11 +216,14 @@ int main(int argc, char *argv[]) {
 
     // write samples (frequency)
     const double PI = 3.14159265358979323846;
-    for (unsigned int i = 0; i < numSamples; ++i) {
-        double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
-        int sample = (int)(s * 32767.0); // -32768 to 32767.
-        addSample16LE(waveFile, sample);
-    }
+    // for (unsigned int i = 0; i < numSamples; ++i) {
+    //     double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
+    //     int sample = (int)(s * 32767.0); // -32768 to 32767.
+    //     addSample16LE(waveFile, sample);
+    // }
+
+    writeSongSamples(argv[1], bpm, sampleRate, waveFile);
+
 
     
     waveFile.close();
