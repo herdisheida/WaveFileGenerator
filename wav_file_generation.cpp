@@ -199,6 +199,9 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
         totalSamples += samples;
     }
 
+    std::cout << "-----------------------------";
+    std::cout << '\n' << "total samples:" << totalSamples << '\n';
+    std::cout << "-----------------------------";
     return totalSamples;
 }
 
