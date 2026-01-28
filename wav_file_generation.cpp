@@ -224,8 +224,11 @@ static void addSampleLE(std::ofstream& waveFile, int sample) {
 }
 
 static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int numSamples, unsigned int sampleRate) {
-    // generate samples of a cosine wave at frequency
-    const double PI = 3.14159265358979323846;
+    /*
+        generate samples of a cosine wave at frequency
+    */
+
+     const double PI = 3.14159265358979323846;
 
     for (unsigned int i = 0; i < numSamples; ++i) {
         double s = std::cos(2.0 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
