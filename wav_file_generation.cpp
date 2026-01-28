@@ -87,11 +87,11 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
     }
 
     unsigned int totalSamples = 0;
-    char noteChar;
-    while (musicFile >> noteChar) { // read until EOF
+    char note;
+    while (musicFile >> note) { // read until EOF
         int num = 0, den = 0;
 
-        if (noteChar == 's') {
+        if (note == 's') {
             // silence: s <num> <den>
             if (!(musicFile >> num >> den)) {
                 std::cout << "Incorrect silence line in file" << "\n";
@@ -114,7 +114,6 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
 
 static void addSampleLE(std::ofstream& waveFile, int sample) {
     /* write one 16-bit audio sample in little-endian format */
-
     if (sample > 32767) sample = 32767;
     if (sample < -32768) sample = -32768;
 
@@ -154,7 +153,6 @@ static double freqTableOctaveOne(char note) {
     }
 }
 
-
 static double noteFrequency(char note, int octave) {
     /* convert note and octave to Hz */
     double f = freqTableOctaveOne(note);
@@ -168,7 +166,6 @@ static double noteFrequency(char note, int octave) {
     return f;
 }
 
-
 static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int numSamples, unsigned int sampleRate) {
     /* write samples of a cos wave at frequency freq */
     const double PI = 3.14159265358979323846;
@@ -179,7 +176,6 @@ static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int 
         addSampleLE(waveFile, sample);
     }
 }
-
 
 static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
     /* Reads the song file and write all audio samples to the WAV file */
@@ -197,11 +193,11 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
         return false;
     }
 
-    char noteChar;
-    while (musicFile >> noteChar) {
+    char note;
+    while (musicFile >> note) {
         int num = 0, den = 0;
 
-        if (noteChar == 's') {
+        if (note == 's') {
             // silence: s <num> <den>
             if (!(musicFile >> num >> den)) {
                 std::cout << "Incorrect silence line in file" << "\n";
@@ -218,9 +214,9 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
                 return false;
             }
 
-            double freq = noteFrequency(noteChar, octave);
+            double freq = noteFrequency(note, octave);
             if (freq <= 0.0) {
-                std::cout << "Unknown note character: " << noteChar << "\n";
+                std::cout << "Unknown note character: " << note << "\n";
                 return false;
             }
 
