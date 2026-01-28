@@ -20,18 +20,15 @@
 
 <br>
 <hr>
-<!-- STUFF -->
 
+
+<!-- STUFF -->
 ### Version
 `Version C`
 
 ### How to run
     
 1. Compile program
-``` bash
-clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
-```
-or
 ``` bash
 make
 ```
@@ -45,5 +42,4 @@ make
 
 
 ### Anything else
-
-GUD LUCK
+  :DD
