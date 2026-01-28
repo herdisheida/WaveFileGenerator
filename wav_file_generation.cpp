@@ -120,6 +120,12 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
 
     musicFile >> baseName;   // first token
     musicFile >> bpm;        // second token
+
+    if (bpm <= 0) {
+        std::cout << "Incorrect file header (missing name or BPM <= 0)\n";
+        return 0;
+    }
+
     return true;
 }
 
@@ -147,9 +153,63 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
         return false;
     }
     
-    musicFile.seekg(22);
+    // read first two lines
+    char outBaseName[33];
+    musicFile >> outBaseName;  // ignore, just consume
+    musicFile >> bpm;
 
 
+    unsigned int totalSamples = 0;
+
+    // read notes, either: "s num den" or "note octave num den"
+    while (true) {
+        char noteChar;
+        if (!(musicFile >> noteChar)) break; // no more tokens
+
+        int octaveOrNum = 0;
+        int num = 0;
+        int den = 0;
+
+        if (noteChar == 's') {
+
+            // silence line: s numerator denominator
+            if (!(musicFile >> num >> den)) {
+                std::cout << "Incorrect silence line in file" << "\n";
+                return 0;
+            }
+
+        } else {
+
+            // note line: note octave numerator denominator
+            int octave = 0;
+            if (!(musicFile >> octave >> num >> den)) {
+                std::cout << "Incorrect note line in file" << "\n";
+                return 0;
+            }
+            (void) octave; // not needed for sample count
+
+        }
+
+        if (den == 0) {
+            std::cout << "Invalid note length: denominator is 0" << "\n";
+            return 0;
+        }
+
+        // beats = 4 * num/den (since 1/4 note = 1 beat)
+        double beats = 4.0 * (double) num / (double) den;
+
+        // seconds for this event
+        double seconds = beats * (60.0 / (double) bpm);
+
+        if (seconds < 0.0) seconds = 0.0;
+
+        // convert to samples (rounded)
+        unsigned int samples = (unsigned int) (seconds * (double) sampleRate + 0.5);
+
+        totalSamples += samples;
+    }
+
+    return totalSamples;
 }
 
 
