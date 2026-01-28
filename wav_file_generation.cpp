@@ -111,7 +111,6 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
     return totalSamples;
 }
 
-
 static void addSampleLE(std::ofstream& waveFile, int sample) {
     /* write one 16-bit audio sample in little-endian format */
     if (sample > 32767) sample = 32767;
@@ -124,7 +123,6 @@ static void addSampleLE(std::ofstream& waveFile, int sample) {
     waveFile.write((const char*) sampleBytes, 2);
 }
 
-
 static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
     /* write silent samples (value 0). */
     for (unsigned int i = 0; i < count; i++) {
@@ -135,7 +133,6 @@ static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
 
 static double freqTableOctaveOne(char note) {
     /* Frequency table for octave 1 */
-
     switch (note) {
         case 'a': return 440.0;
         case 'A': return 466.0;
