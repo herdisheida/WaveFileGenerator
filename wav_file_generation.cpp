@@ -127,15 +127,12 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
 
 static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /*
-        Read music note text file
+        Read music note text file,
+        get wav file name and bpm
 
         format:
             output-wave-filename
             tempo-in-BPM
-
-            char int-octave int-numerator int-denominator
-                or
-            char int1 int2 = silence for int2/int1 many beats
     */
     std::ifstream musicFile(textFilename);
     if (!musicFile) {
@@ -154,11 +151,32 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
 }
 
 static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
+        /*
+        Read music note text file, calculate total samples from each note
 
+        format:
+            ...
+            ...
+
+            char int-octave int-numerator int-denominator
+                or
+            char int1 int2 = silence for int2/int1 many beats
+    */
 }
 
 
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
+            /*
+        Read music note text file, write song sample from each note
+
+        format:
+            ...
+            ...
+
+            char int-octave int-numerator int-denominator
+                or
+            char int1 int2 = silence for int2/int1 many beats
+    */
 }
 
 
