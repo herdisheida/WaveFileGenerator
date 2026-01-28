@@ -128,6 +128,23 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
     return true;
 }
 
+static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sampleRate) {
+    /* 
+        Convert a note length fraction into sample count
+    */
+    // beats = 4 * num/den (1/4 note = 1 beat)
+    double beats = 4.0 * (double) num / (double) den;
+
+    // seconds for this event (sec / bpm = sec per beat)
+    double seconds = beats * (60.0 / (double) bpm);
+
+    if (seconds < 0.0) seconds = 0.0;
+
+    // convert to samples (rounded)
+    return (unsigned int) (seconds * (double) sampleRate + 0.5);
+}
+
+
 static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
     /*
         Reads the song text file, skip first 2 tokens
@@ -184,17 +201,7 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
             return 0;
         }
 
-        // beats = 4 * num/den (since 1/4 note = 1 beat)
-        double beats = 4.0 * (double) num / (double) den;
-
-        // seconds for this event (sec / bpm = sec per beat)
-        double seconds = beats * (60.0 / (double) bpm);
-
-        if (seconds < 0.0) seconds = 0.0;
-
-        // convert to samples (rounded)
-        unsigned int samples = (unsigned int) (seconds * (double) sampleRate + 0.5);
-
+        unsigned int samples = durationToSamples(num, den, bpm, sampleRate);
         totalSamples += samples;
     }
 
@@ -293,8 +300,6 @@ static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
 }
 
 
-static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sampleRate) {
-}
 
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
     /*
