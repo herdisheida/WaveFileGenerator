@@ -198,12 +198,7 @@ static double freqTableOctaveOne(char note) {
 
 
 static double noteFrequency(char note, int octave) {
-    /* convert note and octave to Hz.        
-        Octave format
-            octave 0: divide by 2
-            octave 2: multiply by 2
-            octave 3: multiply by 4
-    */
+    /* convert note and octave to Hz */
     double f = freqTableOctaveOne(note);
     if (f <= 0.0) { return 0.0; }
 
@@ -280,7 +275,8 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
 }
 
 
-// 2 SONGS FILES, HARMONIES them
+
+// 2 SONGS FILES, HARMONIES them HELPERS and functionality
 struct SongState {
     std::ifstream file;
     int bpm;
