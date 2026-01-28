@@ -153,42 +153,51 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
     return true;
 }
 
+static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
+
+}
+
 
 int main(int argc, char *argv[]) {
     const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
     const unsigned short channels = 1;        // Mono
     const unsigned short bits = 16;           // bits per sample
 
-    char textFilename[33];                  // text file name - with music notes
-    char baseName[33];                  // wave file name
-    int freq = 440;                     // Hz
-    double durationSeconds = 0.5;       // Length of tone
 
-
+    // read txt note file
     if (argc != 2) {
-        // need txt filename
         std::cout << "Please write a text filename to read";
-        return 0;
+        std::cout << "Usage: " << argv[0] << " <songfile.txt>\n";
+        return 1;
     }
 
-    // commant line args
-    std::strncpy(textFilename, argv[1], 32);
-    textFilename[32] = '\0';
-    readTextFile(textFilename);
+    char baseName[33];                        // wave file name
+    int bpm = 0;
+
+    if (!readSongHeader(argv[1], baseName, bpm)) return 1;
 
 
-    // clamp duration
-    if (durationSeconds < 0.0) durationSeconds = 0.0;
-    if (durationSeconds > 20.0) durationSeconds = 20.0;
-    
+
+    // char baseName[33];                  // wave file name
+    // int freq = 440;                     // Hz
+    // double durationSeconds = 0.5;       // Length of tone
+
+
+
     // build output wave filename
     char outName[37];
     buildWavFilename(outName, baseName);
 
     // build header
-    unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
+    unsigned int totalSamples = computeTotalSamples(argv[1], bpm, sampleRate);
     unsigned char header[44];
-    makeWaveHeader(header, sampleRate, channels, bits, numSamples);
+    makeWaveHeader(header, sampleRate, channels, bits, totalSamples);
+
+
+    // build header
+    // unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate); // TODO delete (need to calculate this for version c)
+    // unsigned char header[44];
+    // makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
     // write file
     std::ofstream waveFile(outName, std::ios::binary);
