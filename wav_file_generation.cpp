@@ -105,8 +105,7 @@ static void makeWaveHeader(
 
 static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /*
-        Reads the song text file,
-        get wav file name and bpm
+        Reads the song text file and gets wav-filename and bpm
 
         format:
             output-wave-filename
@@ -238,15 +237,21 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
 
 static int writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
     /*
-        Reads the song text file, write song sample from each note
+        Reads the song text file and write song sample for each note
 
-        format:
-            ...
-            ...
+        File format:
+            line 1: output wav base name (string, no spaces)
+            line 2: tempo in BPM (int)
+            
+            remaining lines:
+                note octave numerator denominator
+            or silence:
+                s numerator denominator
 
-            char int-octave int-numerator int-denominator
-                or
-            char int1 int2 = silence for int2/int1 many beats
+        Note: One beat is a quarter note.
+              beats = 4 * numerator/denominator
+              seconds = beats * (60 / bpm)
+              samples = seconds * sampleRate
     */
     std::ifstream musicFile(textFilename);
     if (!musicFile) {
