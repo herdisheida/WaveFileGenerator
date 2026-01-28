@@ -38,7 +38,7 @@ make
 |                | Normal Mode                        | Harmonize Mode                                 |
 | -------------- | ---------------------------------- | ---------------------------------------------- |
 | **Tepmlate:**  | `./program <songA.txt>`            | `./program -h <songB.txt> <songC.txt>`         |
-| **Examples:**  | `./program mystery_tune_01.txt`    | `./program -h saltkjot_win.txt baunir_win.txt` |
+| **Example:**  | `./program mystery_tune_01.txt`    | `./program -h saltkjot_win.txt baunir_win.txt` |
 
 
 ### Anything else
