@@ -198,17 +198,12 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
 
         totalSamples += samples;
     }
-
-    std::cout << "-----------------------------";
-    std::cout << '\n' << "total samples:" << totalSamples << '\n';
-    std::cout << "-----------------------------";
-    return totalSamples;
 }
 
 
-static void addSample16LE(std::ofstream& waveFile, int sample) {
+static void addSampleLE(std::ofstream& waveFile, int sample) {
     /*
-        Writes a single 16-bit PCM audio sample to a file in little-endian order
+        Writes a single PCM audio sample to a file in little-endian order
 
         The input sample is expected to be a signed integer in the range [-32768, 32767].
         The value is clamped to this range, converted to its raw 16-bit representation,
@@ -235,7 +230,7 @@ static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int 
     for (unsigned int i = 0; i < numSamples; ++i) {
         double s = std::cos(2.0 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int)(s * 32767.0); // -32768 to 32767.
-        addSample16LE(waveFile, sample);
+        addSampleLE(waveFile, sample);
     }
 }
 
@@ -245,7 +240,7 @@ static double noteFrequency(char note, int octave) {
 static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
     // silence in 16-bit PCM is sample value 0
     for (unsigned int i = 0; i < count; ++i) {
-        addSample16LE(waveFile, 0);
+        addSampleLE(waveFile, 0);
     }
 }
 
