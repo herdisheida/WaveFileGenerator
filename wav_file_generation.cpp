@@ -2,7 +2,6 @@
 #include <cstring>  // strcmp, strcpy and strlen
 #include <fstream>  // for files
 #include <iostream> // cout, cin
-#include <cstdlib>  // atoi, atof
 
 
 static void buildWavFilename(char outName[37], const char baseName[33]) {
