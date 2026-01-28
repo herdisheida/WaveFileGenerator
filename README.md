@@ -39,7 +39,3 @@ make
 | -------------- | ---------------------------------- |
 | **Tepmlate:**  | `./program <songFilename>`         |
 | **Examples:**  | `./program mystery_tune_01.txt`    |
-
-
-### Anything else
-  :DD

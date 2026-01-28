@@ -128,7 +128,6 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
     }
 
     unsigned int totalSamples = 0;
-
     char noteChar;
     while (musicFile >> noteChar) { // read until EOF
         int num = 0, den = 0;
@@ -198,12 +197,7 @@ static double freqTableOctaveOne(char note) {
 
 
 static double noteFrequency(char note, int octave) {
-    /* convert note and octave to Hz.        
-        Octave format
-            octave 0: divide by 2
-            octave 2: multiply by 2
-            octave 3: multiply by 4
-    */
+    /* convert note and octave to Hz */
     double f = freqTableOctaveOne(note);
     if (f <= 0.0) { return 0.0; }
 
@@ -221,8 +215,7 @@ static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int 
     const double PI = 3.14159265358979323846;
 
     for (unsigned int i = 0; i < numSamples; i++) {
-        // TODO : change to 2.0 * when submitting assignment
-        double s = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int) (s * 32767.0); // WAV only allows -32768 to 32767.
         addSampleLE(waveFile, sample);
     }
@@ -244,7 +237,6 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
         std::cout << "Bad file header (missing name or bpm)\n";
         return false;
     }
-
 
     char noteChar;
     while (musicFile >> noteChar) {
