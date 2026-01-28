@@ -102,7 +102,7 @@ static void makeWaveHeader(
 
 
 
-static void addSample16LE(std::ofstream& outFile, int sample) {
+static void addSample16LE(std::ofstream& waveFile, int sample) {
     /*
         Writes a single 16-bit PCM audio sample to a file in little-endian order
 
@@ -121,9 +121,13 @@ static void addSample16LE(std::ofstream& outFile, int sample) {
     // write sample as little-endian bytes
     unsigned char sampleBytes[2];
     writeUIntLE(sampleBytes, (unsigned int) raw16, 2);
-    outFile.write((const char*) sampleBytes, 2);
+    waveFile.write((const char*) sampleBytes, 2);
 }
 
+
+static void readTextFile(std::ofstream& readfile) {
+    std::ifstream musicFile(); 
+}
 
 
 
@@ -169,12 +173,12 @@ int main(int argc, char *argv[]) {
     makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
     // write file
-    std::ofstream outFile(outName, std::ios::binary);
-    if (!outFile) {
+    std::ofstream waveFile(outName, std::ios::binary);
+    if (!waveFile) {
         std::cout << "Could not open/create output file.\n";
         return 1;
     }
-    outFile.write((const char*) header, 44);
+    waveFile.write((const char*) header, 44);
     
 
     // write samples (frequency)
@@ -182,11 +186,11 @@ int main(int argc, char *argv[]) {
     for (unsigned int i = 0; i < numSamples; ++i) {
         double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int)(s * 32767.0); // -32768 to 32767.
-        addSample16LE(outFile, sample);
+        addSample16LE(waveFile, sample);
     }
 
     
-    outFile.close();
+    waveFile.close();
     std::cout << "WAVE file written to " << outName << '\n';
     return 0;
 }
