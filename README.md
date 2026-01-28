@@ -40,7 +40,7 @@ make
 
 |                | What to type in Terminal           |
 | -------------- | ---------------------------------- |
-| **Tepmlate:**  | `./program <songFilename.txt>`         |
+| **Tepmlate:**  | `./program <songFilename>`         |
 | **Examples:**  | `./program mystery_tune_01.txt`    |
 
 
