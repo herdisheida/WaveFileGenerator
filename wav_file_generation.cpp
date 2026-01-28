@@ -140,8 +140,8 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
         return false;
     }
 
-    musicFile >> baseName;   // first token (no whitespace assumed)
-    musicFile >> bpm;        // second token (BPM int)
+    musicFile >> baseName;   // first token
+    musicFile >> bpm;        // second token
 
     if (!musicFile) {
         std::cout << "Bad file format (missing name or BPM)\n";
