@@ -19,6 +19,7 @@ static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     }
 }
 
+
 static void makeWaveHeader( unsigned char header[44], unsigned int sampleRate, unsigned short numChannels, unsigned short bitsPerSample, unsigned int numSamples) {
     /* fill a 44-byte WAV header */
     
@@ -78,7 +79,6 @@ static void makeWaveHeader( unsigned char header[44], unsigned int sampleRate, u
 }
 
 
-
 static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /* read a wav-filename (without .wav) and bpm from a .txt file */
     std::ifstream musicFile(textFilename);
@@ -96,6 +96,7 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
     }
     return true;
 }
+
 
 static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sampleRate) {
     /*  Convert a note length (num/den of a whole note) into sample count.
@@ -128,11 +129,8 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
 
     unsigned int totalSamples = 0;
 
-    // read until EOF
-    while (true) {
-        char noteChar;
-        if (!(musicFile >> noteChar)) break; // no more notes
-
+    char noteChar;
+    while (musicFile >> noteChar) { // read until EOF
         int num = 0, den = 0;
 
         if (noteChar == 's') {
@@ -157,15 +155,12 @@ static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned
 
 
 static void addSampleLE(std::ofstream& waveFile, int sample) {
-    /* write one 16-bit audio sample in little-endian format,
-       that range from [-32768, 32767] */
+    /* write one 16-bit audio sample in little-endian format */
 
     if (sample > 32767) sample = 32767;
     if (sample < -32768) sample = -32768;
 
-    // interpret the signed value as raw 16-bit data
-    unsigned short raw16 = (unsigned short) sample;
-
+    unsigned short raw16 = (unsigned short) sample; // WAV file wants raw 16-bit data
     // write sample as little-endian bytes
     unsigned char sampleBytes[2];
     writeUIntLE(sampleBytes, (unsigned int) raw16, 2);
@@ -179,6 +174,7 @@ static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
         addSampleLE(waveFile, 0);
     }
 }
+
 
 static double freqTableOctaveOne(char note) {
     /* Frequency table for octave 1 */
@@ -200,6 +196,7 @@ static double freqTableOctaveOne(char note) {
     }
 }
 
+
 static double noteFrequency(char note, int octave) {
     /* convert note and octave to Hz.        
         Octave format
@@ -218,17 +215,18 @@ static double noteFrequency(char note, int octave) {
     return f;
 }
 
+
 static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int numSamples, unsigned int sampleRate) {
     /* write samples of a cos wave at frequency freq */
     const double PI = 3.14159265358979323846;
 
     for (unsigned int i = 0; i < numSamples; i++) {
-        double s = std::cos(2.0 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
-        int sample = (int) (s * 32767.0); // -32768 to 32767.
+        // TODO : change to 2.0 * when submitting assignment
+        double s = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        int sample = (int) (s * 32767.0); // WAV only allows -32768 to 32767.
         addSampleLE(waveFile, sample);
     }
 }
-
 
 
 static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sampleRate, std::ofstream& waveFile) {
@@ -247,10 +245,9 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
         return false;
     }
 
-    while (true) {
-        char noteChar;
-        if (!(musicFile >> noteChar)) break;
 
+    char noteChar;
+    while (musicFile >> noteChar) {
         int num = 0, den = 0;
 
         if (noteChar == 's') {
@@ -284,12 +281,10 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
 }
 
 
-
 int main(int argc, char *argv[]) {
     const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
     const unsigned short channels = 1;        // Mono
     const unsigned short bits = 16;           // bits per sample
-
 
     // read txt song file
     if (argc != 2) {
@@ -308,7 +303,7 @@ int main(int argc, char *argv[]) {
     unsigned int totalSamples = computeTotalSamples(argv[1], bpm, sampleRate);
     if (totalSamples <= 0) {
         std::cout << "Could not compute samples (file error)" << '\n';
-        return 0;
+        return 1;
     }
     unsigned char header[44];
     makeWaveHeader(header, sampleRate, channels, bits, totalSamples);
