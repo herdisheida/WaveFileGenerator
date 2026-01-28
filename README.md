@@ -24,7 +24,7 @@
 
 <!-- STUFF -->
 ### Version
-`Version C`
+`Version C bonus`
 
 ### How to run
     
