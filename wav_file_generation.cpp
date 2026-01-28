@@ -10,7 +10,6 @@ static void buildWavFilename(char outName[37], const char baseName[33]) {
     std::strcat(outName, ".wav");
 }
 
-
 static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     /* writes an integer into out in little-endian, using byteSize bytes */
     for (int i = 0; i < byteSize; i++) {
@@ -19,10 +18,7 @@ static void writeUIntLE(unsigned char* out, unsigned int value, int byteSize) {
     }
 }
 
-
 static void makeWaveHeader( unsigned char header[44], unsigned int sampleRate, unsigned short numChannels, unsigned short bitsPerSample, unsigned int numSamples) {
-    /* fill a 44-byte WAV header */
-    
     unsigned int byteRate = sampleRate * numChannels * (bitsPerSample / 8);
     unsigned short blockAlign = (unsigned short) (numChannels * (bitsPerSample / 8));
     unsigned int subchunk2Size = numSamples * numChannels * (bitsPerSample / 8);
@@ -43,7 +39,6 @@ static void makeWaveHeader( unsigned char header[44], unsigned int sampleRate, u
     writeUIntLE(header + 40, subchunk2Size, 4);
 }
 
-
 static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /* read a wav-filename (without .wav) and bpm from a .txt file */
     std::ifstream musicFile(textFilename);
@@ -61,7 +56,6 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
     }
     return true;
 }
-
 
 static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sampleRate) {
     /*  Convert a note length (num/den of a whole note) into sample count.
