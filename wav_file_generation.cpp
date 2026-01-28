@@ -106,7 +106,7 @@ static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sa
     double beats = 4.0 * (double) num / (double) den;  // 1/4 note = 1 beat
     double seconds = beats * (60.0 / (double) bpm);  // sec / bpm = sec per beat
     if (seconds < 0.0) seconds = 0.0;
-    return (unsigned int) (seconds * (double) sampleRate); // convert to samples
+    return (unsigned int) (seconds * (double) sampleRate + 0.5); // convert to samples
 }
 
 
@@ -221,8 +221,7 @@ static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int 
     const double PI = 3.14159265358979323846;
 
     for (unsigned int i = 0; i < numSamples; i++) {
-        // TODO : change to 2.0 * when submitting assignment
-        double s = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        double s = std::cos(2 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         int sample = (int) (s * 32767.0); // WAV only allows -32768 to 32767.
         addSampleLE(waveFile, sample);
     }
@@ -281,16 +280,189 @@ static bool writeSongSamples(const char* textFilename, int& bpm, unsigned int sa
 }
 
 
+// 2 SONGS FILES, HARMONIES them
+struct SongState {
+    std::ifstream file;
+    int bpm;
+
+    // curr (note or silence)
+    bool active;
+    bool isSilence;
+    double freq;
+    unsigned int samplesLeft;
+
+    // oscillator phase for smooth tone
+    double phase;
+};
+static bool openSong(SongState& s, const char* filename, int& outBpm) {
+    s.file.open(filename);
+    if (!s.file) {
+        std::cout << "Unable to open file: " << filename << "\n";
+        return false;
+    }
+
+    char ignoreName[33];
+    s.file >> ignoreName;
+    s.file >> s.bpm;
+
+    if (!s.file || s.bpm <= 0) {
+        std::cout << "Bad file header in: " << filename << "\n";
+        return false;
+    }
+
+    outBpm = s.bpm;
+    s.active = true;
+    s.samplesLeft = 0;
+    s.isSilence = true;
+    s.freq = 0.0;
+    s.phase = 0.0;
+    return true;
+}
+
+static bool loadNextEvent(SongState& s, unsigned int sampleRate) {
+    // Try to read next note/silence line and set samplesLeft etc.
+    char noteChar;
+    if (!(s.file >> noteChar)) {
+        s.active = false;          // EOF
+        s.samplesLeft = 0;
+        return false;
+    }
+
+    int num = 0, den = 0;
+
+    if (noteChar == 's') {
+        if (!(s.file >> num >> den)) {
+            s.active = false;
+            return false;
+        }
+        s.isSilence = true;
+        s.freq = 0.0;
+    } else {
+        int octave = 0;
+        if (!(s.file >> octave >> num >> den)) {
+            s.active = false;
+            return false;
+        }
+        s.isSilence = false;
+        s.freq = noteFrequency(noteChar, octave);
+        if (s.freq <= 0.0) {
+            std::cout << "Unknown note character: " << noteChar << "\n";
+            s.active = false;
+            return false;
+        }
+    }
+
+    s.samplesLeft = durationToSamples(num, den, s.bpm, sampleRate);
+    return (s.samplesLeft > 0);
+}
+
+static int nextSongSample(SongState& s, unsigned int sampleRate) {
+    if (!s.active) return 0;
+
+    // if curr note finished, load next
+    while (s.active && s.samplesLeft == 0) {
+        if (!loadNextEvent(s, sampleRate)) return 0;
+    }
+    if (!s.active) return 0;
+
+    int out = 0;
+
+    if (s.isSilence) {
+        out = 0;
+    } else {
+        double v = std::cos(s.phase); // [-1,1]
+        out = (int) (v * 32767.0);
+
+        // advance phase
+        const double PI = 3.14159265358979323846;
+        double step = 2 * PI * s.freq / (double) sampleRate;
+        s.phase += step;
+    }
+
+    if (s.samplesLeft > 0) --s.samplesLeft;
+    return out;
+}
+
+
+static bool writeHarmonizedWav(const char* fileA, const char* fileB, const char* outName, unsigned int sampleRate, unsigned short channels, unsigned short bits) {
+    SongState A, B;
+    int bpmA = 0, bpmB = 0;
+
+    if (!openSong(A, fileA, bpmA)) return false;
+    if (!openSong(B, fileB, bpmB)) return false;
+
+    if (bpmA != bpmB) {
+        std::cout << "For -h, both files must have the same BPM." << '\n';
+        return false;
+    }
+
+    // total samples for header = max(totalA, totalB)
+    int tmpBpm = 0;
+    unsigned int totalA = computeTotalSamples(fileA, tmpBpm, sampleRate);
+    unsigned int totalB = computeTotalSamples(fileB, tmpBpm, sampleRate);
+    unsigned int totalOut = (totalA > totalB) ? totalA : totalB;
+
+    if (totalOut == 0) {
+        std::cout << "Could not compute samples." << '\n';
+        return false;
+    }
+
+    unsigned char header[44];
+    makeWaveHeader(header, sampleRate, channels, bits, totalOut);
+
+    std::ofstream waveFile(outName, std::ios::binary);
+    if (!waveFile) {
+        std::cout << "Could not create output file" << '\n';
+        return false;
+    }
+
+    waveFile.write((const char*) header, 44);
+
+    for (unsigned int i = 0; i < totalOut; ++i) {
+        int sa = nextSongSample(A, sampleRate);
+        int sb = nextSongSample(B, sampleRate);
+
+        int mixed = (sa + sb) / 2;
+        addSampleLE(waveFile, mixed);
+    }
+    waveFile.close();
+    return true;
+}
+
+
+
+
 int main(int argc, char *argv[]) {
     const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
     const unsigned short channels = 1;        // Mono
     const unsigned short bits = 16;           // bits per sample
 
-    // read txt song file
+    // -h mode
+    if (argc == 4 && std::strcmp(argv[1], "-h") == 0) {
+        char baseName[33];
+        int bpm = 0;
+        if (!readSongHeader(argv[2], baseName, bpm)) return 1;
+
+        char outName[37];
+        buildWavFilename(outName, baseName);
+
+        if (!writeHarmonizedWav(argv[2], argv[3], outName, sampleRate, channels, bits)) {
+            std::cout << "Failed to write harmonized wav" << "\n";
+            return 1;
+        }
+
+        std::cout << "WAV file created (harmony): " << outName << "\n";
+        return 0;
+    }
+
+    // normal mode
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <songfile.txt>" << "\n";;
+        std::cout << "Usage:\n";
+        std::cout << "  " << argv[0] << " <songA.txt>\n";
+        std::cout << "  " << argv[0] << " -h <songB.txt> <songC.txt>\n";
         return 1;
     }
+
     char baseName[33];  // wave file name
     int bpm = 0;
     if (!readSongHeader(argv[1], baseName, bpm)) return 1;
@@ -323,7 +495,7 @@ int main(int argc, char *argv[]) {
     }
         
     waveFile.close();
-    std::cout << "WAV file created: " << outName << "\n";
+    std::cout << "WAV file created (normal): " << outName << "\n";
     return 0;
 }
     
