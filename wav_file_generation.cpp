@@ -125,8 +125,26 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
 }
 
 
-static void readTextFile(std::ofstream& readfile) {
-    std::ifstream musicFile(); 
+static void readTextFile(char textFilename[33]) {
+    /*
+        Read music note text file
+
+        format:
+            output-wave-filename
+            tempo-in-BPM
+
+            char int1 int2 int3
+                or
+            char int1 int2 = silence for int2/int1 many beats
+    */
+    std::ifstream musicTextFile(textFilename); 
+    if (!musicTextFile.is_open()) {
+        std::cout << "Unable to open file";
+    }
+    // read from file
+
+
+    musicTextFile.close();
 }
 
 
@@ -136,29 +154,18 @@ int main(int argc, char *argv[]) {
     const unsigned short channels = 1;        // Mono
     const unsigned short bits = 16;           // bits per sample
 
+    char textFilename[33];                  // text file name - with music notes
     char baseName[33];                  // wave file name
     int freq = 440;                     // Hz
     double durationSeconds = 0.5;       // Length of tone
 
 
-    if (argc >= 4) {
+    if (argc == 1) {
         // commant line args
-        std::strncpy(baseName, argv[1], 32);
-        baseName[32] = '\0';
+        std::strncpy(textFilename, argv[1], 32);
+        textFilename[32] = '\0';
 
-        freq = std::atoi(argv[2]);
-        durationSeconds = std::atof(argv[3]);
-    } else {
-        // ask usr for args
-        std::cout << "Output filename (no spaces, max 32 chars): ";
-        std::cin >> baseName;
 
-        std::cout << "Frequency (integer Hz): ";
-        std::cin >> freq;
-
-        std::cout << "Duration (seconds): ";
-        std::cin >> durationSeconds;
-    }
     // clamp duration
     if (durationSeconds < 0.0) durationSeconds = 0.0;
     if (durationSeconds > 20.0) durationSeconds = 20.0;
