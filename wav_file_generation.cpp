@@ -287,7 +287,6 @@ struct SongState {
     double freq;
     unsigned int samplesLeft;
 
-    // oscillator phase for smooth tone
     double phase;
 };
 static bool openSong(SongState& s, const char* filename, int& outBpm) {
