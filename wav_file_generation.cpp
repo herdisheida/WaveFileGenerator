@@ -125,7 +125,7 @@ static void addSample16LE(std::ofstream& waveFile, int sample) {
 }
 
 
-static void readTextFile(char textFilename[33]) {
+static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm) {
     /*
         Read music note text file
 
@@ -133,20 +133,25 @@ static void readTextFile(char textFilename[33]) {
             output-wave-filename
             tempo-in-BPM
 
-            char int1 int2 int3
+            char int-octave int-numerator int-denominator
                 or
             char int1 int2 = silence for int2/int1 many beats
     */
-    std::ifstream musicTextFile(textFilename); 
-    if (!musicTextFile.is_open()) {
-        std::cout << "Unable to open file";
+    std::ifstream musicFile(textFilename);
+    if (!musicFile) {
+        std::cout << "Unable to open file: " << textFilename << "\n";
+        return false;
     }
-    // read from file
-    std::cout << "FILE WAS READ\n";
 
-    musicTextFile.close();
+    musicFile >> baseName;   // first token (no whitespace assumed)
+    musicFile >> bpm;        // second token (BPM int)
+
+    if (!musicFile) {
+        std::cout << "Bad file format (missing name or BPM)\n";
+        return false;
+    }
+    return true;
 }
-
 
 
 int main(int argc, char *argv[]) {
@@ -160,7 +165,7 @@ int main(int argc, char *argv[]) {
     double durationSeconds = 0.5;       // Length of tone
 
 
-    if (argc <= 1) {
+    if (argc != 2) {
         // need txt filename
         std::cout << "Please write a text filename to read";
         return 0;
