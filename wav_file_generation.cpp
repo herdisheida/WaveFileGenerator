@@ -142,7 +142,7 @@ static void readTextFile(char textFilename[33]) {
         std::cout << "Unable to open file";
     }
     // read from file
-
+    std::cout << "FILE WAS READ";
 
     musicTextFile.close();
 }
@@ -164,7 +164,8 @@ int main(int argc, char *argv[]) {
         // commant line args
         std::strncpy(textFilename, argv[1], 32);
         textFilename[32] = '\0';
-
+        readTextFile(textFilename);
+    }
 
     // clamp duration
     if (durationSeconds < 0.0) durationSeconds = 0.0;
