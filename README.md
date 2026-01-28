@@ -31,13 +31,16 @@
 ``` bash
 clang++   -std=c++98 -Wall -Wextra   wav_file_generation.cpp     -o program
 ```
+or
+``` bash
+make
+```
 
 2. Run program
-
-|                | No arguments | With arguments                                                                                                                           |
-| -------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Arguments:** |              | 1. generatedFilename: 32 chars (do not include .wav)<br>2. frequency: Hz sound frequency (INT)<br>3. duration: seconds (double)<br>      |
-| **Examples:**  | `./program`  | `./program <generatedFilename> <frequency> <duration>` <br> `./program test_sound 440 0.5`                                               |
+|                | What to type in Terminal|
+| -------------- | ---------------------------------- |
+| **Tepmlate:**  | `./program <songFile.txt>`         |
+| **Examples:**  | `./program mystery_tune_01.txt`    |
 
 
 ### Anything else
