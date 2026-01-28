@@ -367,14 +367,10 @@ int main(int argc, char *argv[]) {
     }
     waveFile.write((const char*) header, 44);
 
-
-
     writeSongSamples(argv[1], bpm, sampleRate, waveFile);
-
-
     
     waveFile.close();
-    std::cout << "WAVE file written to " << outName << '\n';
+    std::cout << "WAVE file was successfully created as " << outName << '\n';
     return 0;
 }
     
