@@ -144,7 +144,7 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
     musicFile >> bpm;        // second token
 
     if (!musicFile) {
-        std::cout << "Bad file format (missing name or BPM)\n";
+        std::cout << "Bad file format (missing name or BPM)" << "\n";
         return false;
     }
     return true;
@@ -187,10 +187,10 @@ int main(int argc, char *argv[]) {
     const unsigned short bits = 16;           // bits per sample
 
 
-    // read txt note file
+    // read txt song file
     if (argc != 2) {
-        std::cout << "Please write a text filename to read";
-        std::cout << "Usage: " << argv[0] << " <songfile.txt>\n";
+        std::cout << "Please write a text filename to read" << "\n";;
+        std::cout << "Usage: " << argv[0] << " <songfile.txt>" << "\n";;
         return 1;
     }
 
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
     // write header
     std::ofstream waveFile(outName, std::ios::binary);
     if (!waveFile) {
-        std::cout << "Could not open/create output file.\n";
+        std::cout << "Could not open/create output file" << "\n";
         return 1;
     }
     waveFile.write((const char*) header, 44);
