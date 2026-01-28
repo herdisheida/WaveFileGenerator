@@ -276,13 +276,6 @@ int main(int argc, char *argv[]) {
     if (!readSongHeader(argv[1], baseName, bpm)) return 1;
 
 
-
-    // char baseName[33];                  // wave file name // TODO DELETE i think -- i get frequency from the notes in the txt file and duration from the sum of note lengths
-    // int freq = 440;                     // Hz
-    // double durationSeconds = 0.5;       // Length of tone
-
-
-
     // build output wave filename
     char outName[37];
     buildWavFilename(outName, baseName);
@@ -291,13 +284,6 @@ int main(int argc, char *argv[]) {
     unsigned int totalSamples = computeTotalSamples(argv[1], bpm, sampleRate);
     unsigned char header[44];
     makeWaveHeader(header, sampleRate, channels, bits, totalSamples);
-
-
-    // build header
-    //  // TODO delete (need to calculate this for version c)
-    // unsigned int numSamples = (unsigned int) (durationSeconds * sampleRate);
-    // unsigned char header[44];
-    // makeWaveHeader(header, sampleRate, channels, bits, numSamples);
 
 
     // write header
