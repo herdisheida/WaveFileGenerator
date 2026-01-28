@@ -11,7 +11,7 @@ static void buildWavFilename(char outName[37], const char baseName[33]) {
         baseName stores max 32 chars + '\0'
     */
     std::strcpy(outName, baseName);
-    std::strcat(outName, ".wav"); // TODO - don't know if i can use strcat()
+    std::strcat(outName, ".wav");
 }
 
 
