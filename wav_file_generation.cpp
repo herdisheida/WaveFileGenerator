@@ -128,7 +128,7 @@ static bool readSongHeader(const char* textFilename, char baseName[33], int& bpm
     return true;
 }
 
-static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
+static unsigned computeTotalSamples(const char* textFilename, int& bpm, unsigned int sampleRate) {
     /*
         Reads the song text file, skip first 2 tokens
         and returns total number of audio samples.
@@ -142,7 +142,7 @@ static int computeTotalSamples(const char* textFilename, int& bpm, unsigned int 
     std::ifstream musicFile(textFilename);
     if (!musicFile) {
         std::cout << "Unable to open file: " << textFilename << "\n";
-        return false;
+        return 0;
     }
     // skip tokens
     char ignoreName[33];
@@ -237,16 +237,6 @@ static void writeToneSamples(std::ofstream& waveFile, double freq, unsigned int 
     }
 }
 
-static double noteFrequency(char note, int octave) {
-}
-
-static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
-    // silence in 16-bit PCM is sample value 0
-    for (unsigned int i = 0; i < count; ++i) {
-        addSampleLE(waveFile, 0);
-    }
-}
-
 
 static double freqTableOctaveOne(char note) {
     // lowercase = base note
@@ -267,6 +257,40 @@ static double freqTableOctaveOne(char note) {
         default:  return 0.0;
     }
 }
+
+
+static double noteFrequency(char note, int octave) {
+    /* 
+        Converts (note, octave) to frequency in Hz
+        
+        Octave format
+            octave 0: divide by 2
+            octave 2: multiply by 2
+            octave 3: multiply by 4
+    */
+
+    double f = freqTableOctaveOne(note);
+    if (f <= 0.0) { return 0.0; }
+
+    // how many octaves away from octave 1 is the curr note
+    int diff = octave - 1;
+
+    // * or / by powers of 2
+    if (diff > 0) {
+        while (diff--) f *= 2.0;
+    } else if (diff < 0) {
+        while (diff++) f /= 2.0;
+    }
+    return f;
+}
+
+static void writeSilenceSamples(std::ofstream& waveFile, unsigned int count) {
+    // silence in 16-bit PCM is sample value 0
+    for (unsigned int i = 0; i < count; ++i) {
+        addSampleLE(waveFile, 0);
+    }
+}
+
 
 static unsigned int durationToSamples(int num, int den, int bpm, unsigned int sampleRate) {
 }
@@ -355,6 +379,10 @@ int main(int argc, char *argv[]) {
 
     // build header
     unsigned int totalSamples = computeTotalSamples(argv[1], bpm, sampleRate);
+    if (totalSamples <= 0) {
+        std::cout << "Could not compute samples (file error?)" << '\n';
+        return 0;
+    }
     unsigned char header[44];
     makeWaveHeader(header, sampleRate, channels, bits, totalSamples);
 
