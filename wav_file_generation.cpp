@@ -21,8 +21,6 @@ void writeUnsignedShort(std::ofstream& out, unsigned short x) {
 
 void writeShort(std::ofstream&  out, short x) {
     /* write signed short (16 bit) as raw bytes in  little-endian form */
-    // out.put(x & 0x00FF);
-    // out.put((x & 0xFF00) >> 8);
     unsigned short raw = (unsigned short) x;
     out.put((unsigned char)( raw       & 0xFF));
     out.put((unsigned char)((raw >> 8) & 0xFF));
