@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     int bpm = 0;
 
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << "<songfile.txt>" << '\n';
+        std::cout << "Usage: " << argv[0] << " <songfile.txt>" << '\n';
         return 1;
     }
 
