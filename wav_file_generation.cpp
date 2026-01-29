@@ -39,7 +39,6 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
     const char WAVE[4] = {'W', 'A', 'V', 'E'};
     const char FMT[4]  = {'f', 'm', 't', ' '};
     const char DATA[4] = {'d', 'a', 't', 'a'};
-
     writeFourChars(out, RIFF);                     // ChunkId
     writeUnsignedInt(out, 36 + subchunk2Size);     // ChunkSize
     writeFourChars(out, WAVE);                     // Format
@@ -56,7 +55,6 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
 }
 
 static double getBaseFrequency(char note) {
-    /* Frequency table for octave 1 */
     switch (note) {
         case 'a': return 440.0;
         case 'A': return 466.0;
@@ -80,8 +78,6 @@ static double getFrequency(char note, int octave) {
     /* convert note and octave to Hz */
     if (note == 's') return 0.0;
     double base_freq = getBaseFrequency(note);
-
-    // each octave up doubles frequency and each octave down halves it
     if (octave == 0) return base_freq / 2;
     return base_freq * pow(2, octave - 1);
 }
@@ -89,14 +85,13 @@ static double getFrequency(char note, int octave) {
 int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
     /*  Convert a note length (num/den of a whole note) into sample count */
     const double beats = 4.0 * (double) num / (double) den;  // whole note = 4 beats
-    double seconds = beats * (60.0 / (double) bpm);    // seconds per beat = 60 bpm
+    double seconds = beats * (60.0 / (double) bpm);          // seconds per beat = 60 bpm
     if (seconds < 0.0) seconds = 0.0;
-    return (unsigned int) (seconds * (double) sampleRate + 0.5); // convert to samples
+    return (unsigned int) (seconds * (double) sampleRate + 0.5);  // convert to samples
 }
 
 void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate) {
     const double PI = 3.14159265358979323846;
-
     for (unsigned int i = 0; i < nunSamples; i++) {
         double sample = 0;
         if (freq != 0.0) {
@@ -127,10 +122,11 @@ int main(int argc, char *argv[]) {
     }
 
     // get song header
-    musicFile >> wavFilename;
-    musicFile >> bpm;
-
-
+    musicFile >> wavFilename >> bpm;
+    if (bpm <= 0) {
+        std::cout << "BPM has to be a (+) INT"<< '\n';
+        return 1; 
+    }
     int nameLength = strlen(wavFilename);
     if (
         nameLength > 32 || (
@@ -141,10 +137,9 @@ int main(int argc, char *argv[]) {
         )
     ) {
         std::cout << "Incorrect WAV filename format:" << '\n';
-        std::cout << "  32 char max, don't write the file extension (.wav)" << '\n';
+        std::cout << "     32 char max, don't write the file extension (.wav)" << '\n';
         return 1;   
     }
-
     std::strcat(wavFilename, ".wav");  // add .wav
 
     // get song data
@@ -164,7 +159,15 @@ int main(int argc, char *argv[]) {
         }
 
         if (!(musicFile >> numerator >> denominator)) {
-            std::cout << "Incorrect note format in txt song file" << '\n';
+            std::cout << "Incorrect txt song format:" << '\n';
+            std::cout << "     <wav-filename>" << '\n';
+            std::cout << "     <bpm>" << '\n';
+            std::cout << "     notes: s <num> <den> or <note> <octave> <num> <den>" << '\n';
+            return 1;
+        }
+        if (denominator == 0) {
+            std::cout << "Incorrect txt song format:" << '\n';
+            std::cout << "     Denominator can't be 0" << '\n';
             return 1;
         }
 
@@ -175,15 +178,12 @@ int main(int argc, char *argv[]) {
     }
     musicFile.close();
 
-
     // create wav file
     std::ofstream waveFile(wavFilename, std::ios::binary);
     writeWaveHeader(waveFile, totalSamples, sampleRate); // header
-
     for (int i = 0; i < numSound; i++) {
         writeData(waveFile, samples[i], frequencies[i], sampleRate); // data (Hz frequencies)
     }
-
     waveFile.close();
     std::cout << "WAV file created: " << wavFilename << '\n';
     return 0;
