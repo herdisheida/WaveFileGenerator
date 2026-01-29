@@ -103,7 +103,7 @@ int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
         Whole note = 4 beats. One beat lasts 60/bpm seconds. */
 
     // TODO delete?
-    // return 44100 * numerator * 60 * 4 / ( bpm  * denominator) ;
+    // return 44100 * numerator * 60 * 4 / ( bpm  * denominator);
 
     double beats = 4.0 * (double) num / (double) den;  // whole note = 4 beats
     double seconds = beats * (60.0 / (double) bpm);    // seconds per beat = 60 bpm
