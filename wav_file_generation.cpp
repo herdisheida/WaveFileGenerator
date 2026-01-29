@@ -1,9 +1,7 @@
-#include <cmath>    // calcualte sine wave
+#include <cmath>    // calcualte cos wave
 #include <cstring>  // strcmp, strcpy and strlen
 #include <fstream>  // for files
 #include <iostream> // cout, cin
-
-
 
 
 void writeUnsignedInt(std::ofstream& out, unsigned int x) {
@@ -18,14 +16,12 @@ void writeUnsignedShort(std::ofstream& out, unsigned short x) {
     out.put((unsigned char)( x       & 0xFF));
     out.put((unsigned char)((x >> 8) & 0xFF));
 }
-
 void writeShort(std::ofstream&  out, short x) {
     /* write signed short (16 bit) as raw bytes in  little-endian form */
     unsigned short raw = (unsigned short) x;
     out.put((unsigned char)( raw       & 0xFF));
     out.put((unsigned char)((raw >> 8) & 0xFF));
 }
-
 void writeFourChars(std::ofstream& out, const char x[]) {
     out.write(x, 4);
 }
@@ -61,8 +57,6 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
     writeUnsignedInt(out, subchunk2Size);          // Subchunk2Size
 }
 
-
-
 static double getBaseFrequency(char note) {
     /* Frequency table for octave 1 */
     switch (note) {
@@ -94,8 +88,6 @@ static double getFrequency(char note, int octave) {
     return base_freq * pow(2, octave - 1);
 }
 
-
-
 int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
     /*  Convert a note length (num/den of a whole note) into sample count.
         Whole note = 4 beats. One beat lasts 60/bpm seconds. */
@@ -104,7 +96,6 @@ int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
     if (seconds < 0.0) seconds = 0.0;
     return (unsigned int) (seconds * (double) sampleRate + 0.5); // convert to samples
 }
-
 
 void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate) {
     const double PI = 3.14159265358979323846;
@@ -120,7 +111,6 @@ void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsign
         writeShort(outs, (short) s);
     }
 }
-
 
 
 int main(int argc, char *argv[]) {
@@ -198,4 +188,3 @@ int main(int argc, char *argv[]) {
     std::cout << "WAV file created: " << wavFilename << '\n';
     return 0;
 }
-    
