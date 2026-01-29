@@ -108,19 +108,24 @@ int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
 }
 
 
-void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate, double freq2, bool harmonize) {
+void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate, double freq2) {
     const double PI = 3.14159265358979323846;
 
 
     for (unsigned int i = 0; i < nunSamples; i++) {
 
         double sample = 0;
+        double sample1 = 0;
+        double sample2 = 0;
+
         if (freq != 0.0) {
 
-            if (harmonize) freq = (freq + freq2) / 2; // harmonizing frequencies
-
             // TODO add 2.0 * because im testing í canvas þarf þá að sleppa því þar
-            sample = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+            sample1 = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+
+            sample2 = std::cos(PI * freq2 * (double) i / (double) sampleRate);
+
+            sample = (sample1 + sample2) / 2;
         }
 
         int s = (int) (sample * 32767.0);  // WAV only allows -32768 to 32767.
@@ -248,7 +253,7 @@ int main(int argc, char *argv[]) {
 
         // write data
         for (int i = 0; i < numSound2; i++) {
-            writeData(waveFile, samples2[i], frequencies[i], sampleRate, frequencies2[i], harmonize);
+            writeData(waveFile, samples2[i], frequencies[i], sampleRate, frequencies2[i]);
         }
     
     } else {
@@ -257,7 +262,7 @@ int main(int argc, char *argv[]) {
     
         // write data
         for (int i = 0; i < numSound; i++) {
-            writeData(waveFile, samples[i], frequencies[i], sampleRate, frequencies2[i], harmonize);
+            writeData(waveFile, samples[i], frequencies[i], sampleRate, frequencies2[i]);
         }
     }
 
