@@ -162,8 +162,11 @@ int main(int argc, char *argv[]) {
         if (note != 's') {
             musicFile >> octave;
         }
-        musicFile >> numerator;
-        musicFile >> denominator;
+
+        if (!(musicFile >> numerator >> denominator)) {
+            std::cout << "Incorrect note format in txt song file" << '\n';
+            return 1;
+        }
 
         frequencies[numSound] = getFrequency(note, octave);
         samples[numSound] = getSampleCount(numerator, denominator, bpm, sampleRate);
