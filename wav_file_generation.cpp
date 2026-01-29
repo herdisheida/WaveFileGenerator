@@ -111,7 +111,9 @@ int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
 void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate, double freq2, bool harmonize) {
     const double PI = 3.14159265358979323846;
 
+
     for (unsigned int i = 0; i < nunSamples; i++) {
+
         double sample = 0;
         if (freq != 0.0) {
 
@@ -142,38 +144,43 @@ int main(int argc, char *argv[]) {
     std::ifstream musicFile;
     bool harmonize = false;
 
+    std::cout << "argc: " << argc << "\n";
+    for (int i = 0; i < argc; i++) {
+    std::cout << "i   : " << i << " - ";
+    std::cout << "argv: " << argv[i] << "\n";
+    }
+
+
     // -h mode
     if (argc == 4 && std::strcmp(argv[1], "-h") == 0) {
-        std::ifstream musicFile2(argv[2]);
+        musicFile2.open(argv[3]);
         if (!musicFile2) {
-            std::cout << "Unable to open file: " << argv[2] << "\n";
+            std::cout << "Unable to open file: " << argv[3] << "\n";
             return 1;
         }
-        std::ifstream musicFile(argv[2]);
+        musicFile.open(argv[2]);
         if (!musicFile) {
             std::cout << "Unable to open file: " << argv[2] << "\n";
             return 1;
         }
         harmonize = true;
-    }
 
-    if (argc != 2) {
+    }
+    
+    if (argc != 2 && std::strcmp(argv[1], "-h") != 0) {
         std::cout << "Usage:\n";
         std::cout << "  " << argv[0] << " <songA.txt>\n";
         std::cout << "  " << argv[0] << " -h <songB.txt> <songC.txt>\n";
         return 1;
     }
 
-    // read terminal
-    if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <songfile.txt>" << "\n";;
-        return 1;
-    }
 
-    std::ifstream musicFile(argv[1]);
-    if (!musicFile) {
-        std::cout << "Unable to open file: " << argv[1] << "\n";
-        return 1;
+    if (!harmonize) {
+        musicFile.open(argv[1]);
+        if (!musicFile) {
+            std::cout << "Unable to open file: " << argv[1] << "\n";
+            return 1;
+        }
     }
 
 
@@ -183,10 +190,6 @@ int main(int argc, char *argv[]) {
     std::strcat(wavFilename, ".wav");  // add .wav
 
     musicFile >> bpm;
-
-    std::cout << "WAV file to write: " << wavFilename << '\n';
-    std::cout << "Beats per minute: " << bpm << '\n';
-
 
     // get song data 1
     char note;
@@ -198,6 +201,7 @@ int main(int argc, char *argv[]) {
     int samples[1024];
     int numSound = 0;
     int totalSamples = 0;
+
 
     while (musicFile >> note) {
         if (note != 's') {
@@ -212,6 +216,7 @@ int main(int argc, char *argv[]) {
         numSound++;
     }
     musicFile.close();
+
 
     // song data 2
     char note2;
@@ -243,13 +248,13 @@ int main(int argc, char *argv[]) {
     std::ofstream waveFile(wavFilename, std::ios::binary);
 
     // write header
-    if (harmonize && numSound2 > numSound) {
+    if (harmonize && totalSamples2 > totalSamples) {
 
         // harmonize
-        writeWaveHeader(waveFile, totalSamples + totalSamples2, sampleRate);
+        writeWaveHeader(waveFile, totalSamples2, sampleRate);
 
         // write data
-        for (int i = 0; i < numSound; i++) {
+        for (int i = 0; i < numSound2; i++) {
             writeData(waveFile, samples2[i], frequencies[i], sampleRate, frequencies2[i], harmonize);
         }
     
