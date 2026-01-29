@@ -35,7 +35,7 @@ make
 
 2. Run program
 
-|                | What to type in Terminal           |
-| -------------- | ---------------------------------- |
-| **Tepmlate:**  | `./program <songFilename>`         |
-| **Examples:**  | `./program mystery_tune_01.txt`    |
+|                | Normal Mode                        | Harmonize Mode                                 |
+| -------------- | ---------------------------------- | ---------------------------------------------- |
+| **Tepmlate:**  | `./program <songA.txt>`            | `./program -h <songB.txt> <songC.txt>`         |
+| **Example:**   | `./program mystery_tune_01.txt`    | `./program -h saltkjot_win.txt baunir_win.txt` |
