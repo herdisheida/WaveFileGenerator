@@ -4,10 +4,6 @@
 #include <iostream> // cout, cin
 
 
-char RIFF[4] = {'R', 'I', 'F', 'F'};
-char WAVE[4] = {'W', 'A', 'V', 'E'};
-char FMT[4]  = {'f', 'm', 't', ' '};
-char DATA[4] = {'d', 'a', 't', 'a'};
 
 
 void writeUnsignedInt(std::ofstream& out, unsigned int x) {
@@ -24,12 +20,16 @@ void writeUnsignedShort(std::ofstream& out, unsigned short x) {
 }
 
 void writeShort(std::ofstream&  out, short x) {
-    out.put(x & 0x00FF);
-    out.put((x & 0xFF00) >> 8);
+    /* write signed short (16 bit) as raw bytes in  little-endian form */
+    // out.put(x & 0x00FF);
+    // out.put((x & 0xFF00) >> 8);
+    unsigned short raw = (unsigned short) x;
+    out.put((unsigned char)( raw       & 0xFF));
+    out.put((unsigned char)((raw >> 8) & 0xFF));
 }
 
-void writeFourChars(std::ofstream& out, char x[]) {
-    for (int i = 0; i < 4; i++) out.put(x[i]);
+void writeFourChars(std::ofstream& out, const char x[]) {
+    out.write(x, 4);
 }
 
 void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int sampleRate) {
@@ -41,9 +41,15 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
     unsigned int byteRate = sampleRate * noChannels * bitsSample / 8;
     unsigned int subchunk2Size = totalSamples * noChannels * bitsSample / 8;
 
+    const char RIFF[4] = {'R', 'I', 'F', 'F'};
+    const char WAVE[4] = {'W', 'A', 'V', 'E'};
+    const char FMT[4]  = {'f', 'm', 't', ' '};
+    const char DATA[4] = {'d', 'a', 't', 'a'};
+
     writeFourChars(out, RIFF);                     // ChunkId
     writeUnsignedInt(out, 36 + subchunk2Size);     // ChunkSize
     writeFourChars(out, WAVE);                     // Format
+
     writeFourChars(out, FMT);                      // Subchunk1ID
     writeUnsignedInt(out, subchunk1Size);          // Subchunk1Size
     writeUnsignedShort(out, 1);                    // AudioFormat
@@ -52,27 +58,11 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
     writeUnsignedInt(out, byteRate);               // ByteRate
     writeUnsignedShort(out, blockAlign);           // BLockAlign
     writeUnsignedShort(out, bitsSample);           // BitsPerSimple
+    
     writeFourChars(out, DATA);                     // Subchunk2ID
     writeUnsignedInt(out, subchunk2Size);          // Subchunk2Size
 }
 
-
-void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate) {
-    const double PI = 3.14159265358979323846;
-
-
-    for (unsigned int i = 0; i < nunSamples; i++) {
-        double sample = 0;
-        if (freq != 0.0) {
-            // TODO add 2.0 * because im testing í canvas þarf þá að sleppa því þar
-            sample = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
-        }
-
-        // TODO short? -- not int?
-        short shortSample = (short) (32767.0 * sample);  // WAV only allows -32768 to 32767.
-        writeShort(outs, shortSample);
-    }
-}
 
 
 static double getBaseFrequency(char note) {
@@ -108,18 +98,38 @@ static double getFrequency(char note, int octave) {
 
 
 
-int getSampleCount(int num, int den, int bpm, unsigned int sampleRate) {
+int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
     /*  Convert a note length (num/den of a whole note) into sample count.
         Whole note = 4 beats. One beat lasts 60/bpm seconds. */
 
     // TODO delete?
     // return 44100 * numerator * 60 * 4 / ( bpm  * denominator) ;
 
-    double beats = 4.0 * (double) num / (double) den;  // 1/4 note = 1 beat
-    double seconds = beats * (60.0 / (double) bpm);  // sec / bpm = sec per beat
+    double beats = 4.0 * (double) num / (double) den;  // whole note = 4 beats
+    double seconds = beats * (60.0 / (double) bpm);    // seconds per beat = 60 bpm
     if (seconds < 0.0) seconds = 0.0;
-    return (unsigned int) (seconds * (double) sampleRate); // convert to samples
+    return (unsigned int) (seconds * (double) sampleRate + 0.5); // convert to samples
 }
+
+
+void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate) {
+    const double PI = 3.14159265358979323846;
+
+    for (unsigned int i = 0; i < nunSamples; i++) {
+        double sample = 0;
+        if (freq != 0.0) {
+            // TODO add 2.0 * because im testing í canvas þarf þá að sleppa því þar
+            sample = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+        }
+
+        int s = (int) (sample * 32767.0);  // WAV only allows -32768 to 32767.
+        if (s > 32767) s = 32767;
+        if (s < -32768) s = -32768;
+
+        writeShort(outs, (short) s);
+    }
+}
+
 
 
 int main(int argc, char *argv[]) {
@@ -162,8 +172,7 @@ int main(int argc, char *argv[]) {
     int numSound = 0;
     int totalSamples = 0;
 
-    while (!musicFile.eof()) {
-        musicFile >> note;
+    while (musicFile >> note) {
         if (note != 's') {
             musicFile >> octave;
         }
