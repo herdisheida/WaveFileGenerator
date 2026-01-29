@@ -99,14 +99,11 @@ static double getBaseFrequency(char note) {
 static double getFrequency(char note, int octave) {
     /* convert note and octave to Hz */
     if (note == 's') return 0.0;
-
     double base_freq = getBaseFrequency(note);
-    
-    int diff = octave - 1; // how far from octave 1
+
     // each octave up doubles frequency and each octave down halves it
-    while (diff > 0) { base_freq *= 2.0; --diff; }
-    while (diff < 0) { base_freq /= 2.0; ++diff; }
-    return base_freq;
+    if (octave == 0) return base_freq / 2;
+    return base_freq * pow(2, octave - 1);
 }
 
 
