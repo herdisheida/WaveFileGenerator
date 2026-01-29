@@ -150,12 +150,8 @@ int main(int argc, char *argv[]) {
 
     musicFile >> wavFilename;
     std::strcat(wavFilename, ".wav");  // add .wav
-
+    
     musicFile >> bpm;
-
-    std::cout << "WAV file to write: " << wavFilename << '\n';
-    std::cout << "Beats per minute: " << bpm << '\n';
-
 
     // get song data
     char note;
