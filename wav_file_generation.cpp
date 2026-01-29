@@ -144,13 +144,6 @@ int main(int argc, char *argv[]) {
     std::ifstream musicFile;
     bool harmonize = false;
 
-    std::cout << "argc: " << argc << "\n";
-    for (int i = 0; i < argc; i++) {
-    std::cout << "i   : " << i << " - ";
-    std::cout << "argv: " << argv[i] << "\n";
-    }
-
-
     // -h mode
     if (argc == 4 && std::strcmp(argv[1], "-h") == 0) {
         musicFile2.open(argv[3]);
