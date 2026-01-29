@@ -162,7 +162,8 @@ int main(int argc, char *argv[]) {
     int numSound = 0;
     int totalSamples = 0;
 
-    while (musicFile >> note) {
+    while (!musicFile.eof()) {
+        musicFile >> note;
         if (note != 's') {
             musicFile >> octave;
         }
