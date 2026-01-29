@@ -27,13 +27,13 @@ void writeFourChars(std::ofstream& out, const char x[]) {
 }
 
 void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int sampleRate) {
-    unsigned int bitsSample = 16;       // bits per sample
-    unsigned short noChannels = 1;      // Mono
+    const unsigned int bitsSample = 16;       // bits per sample
+    const unsigned short noChannels = 1;      // Mono
     unsigned int subchunk1Size = 16;
 
-    unsigned short blockAlign = noChannels * bitsSample / 8;
-    unsigned int byteRate = sampleRate * noChannels * bitsSample / 8;
-    unsigned int subchunk2Size = totalSamples * noChannels * bitsSample / 8;
+    const unsigned short blockAlign = noChannels * bitsSample / 8;
+    const unsigned int byteRate = sampleRate * noChannels * bitsSample / 8;
+    const unsigned int subchunk2Size = totalSamples * noChannels * bitsSample / 8;
 
     const char RIFF[4] = {'R', 'I', 'F', 'F'};
     const char WAVE[4] = {'W', 'A', 'V', 'E'};
@@ -43,7 +43,6 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
     writeFourChars(out, RIFF);                     // ChunkId
     writeUnsignedInt(out, 36 + subchunk2Size);     // ChunkSize
     writeFourChars(out, WAVE);                     // Format
-
     writeFourChars(out, FMT);                      // Subchunk1ID
     writeUnsignedInt(out, subchunk1Size);          // Subchunk1Size
     writeUnsignedShort(out, 1);                    // AudioFormat
@@ -52,7 +51,6 @@ void writeWaveHeader(std::ofstream& out, unsigned int totalSamples, unsigned int
     writeUnsignedInt(out, byteRate);               // ByteRate
     writeUnsignedShort(out, blockAlign);           // BLockAlign
     writeUnsignedShort(out, bitsSample);           // BitsPerSimple
-    
     writeFourChars(out, DATA);                     // Subchunk2ID
     writeUnsignedInt(out, subchunk2Size);          // Subchunk2Size
 }
@@ -89,9 +87,8 @@ static double getFrequency(char note, int octave) {
 }
 
 int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
-    /*  Convert a note length (num/den of a whole note) into sample count.
-        Whole note = 4 beats. One beat lasts 60/bpm seconds. */
-    double beats = 4.0 * (double) num / (double) den;  // whole note = 4 beats
+    /*  Convert a note length (num/den of a whole note) into sample count */
+    const double beats = 4.0 * (double) num / (double) den;  // whole note = 4 beats
     double seconds = beats * (60.0 / (double) bpm);    // seconds per beat = 60 bpm
     if (seconds < 0.0) seconds = 0.0;
     return (unsigned int) (seconds * (double) sampleRate + 0.5); // convert to samples
