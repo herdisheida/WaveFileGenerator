@@ -108,12 +108,15 @@ int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
 }
 
 
-void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate) {
+void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate, double freq2, bool harmonize) {
     const double PI = 3.14159265358979323846;
 
     for (unsigned int i = 0; i < nunSamples; i++) {
         double sample = 0;
         if (freq != 0.0) {
+
+            if (harmonize) freq = (freq + freq2) / 2; // harmonizing frequencies
+
             // TODO add 2.0 * because im testing í canvas þarf þá að sleppa því þar
             sample = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
         }
@@ -131,6 +134,35 @@ void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsign
 int main(int argc, char *argv[]) {
     const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
 
+    // song header
+    char wavFilename[37]; // 32 + "".wav" + '\n'
+    int bpm = 0;
+
+    std::ifstream musicFile2;  // declare here
+    std::ifstream musicFile;
+    bool harmonize = false;
+
+    // -h mode
+    if (argc == 4 && std::strcmp(argv[1], "-h") == 0) {
+        std::ifstream musicFile2(argv[2]);
+        if (!musicFile2) {
+            std::cout << "Unable to open file: " << argv[2] << "\n";
+            return 1;
+        }
+        std::ifstream musicFile(argv[2]);
+        if (!musicFile) {
+            std::cout << "Unable to open file: " << argv[2] << "\n";
+            return 1;
+        }
+        harmonize = true;
+    }
+
+    if (argc != 2) {
+        std::cout << "Usage:\n";
+        std::cout << "  " << argv[0] << " <songA.txt>\n";
+        std::cout << "  " << argv[0] << " -h <songB.txt> <songC.txt>\n";
+        return 1;
+    }
 
     // read terminal
     if (argc != 2) {
@@ -144,9 +176,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // get song header
-    char wavFilename[37]; // 32 + "".wav" + '\n'
-    int bpm = 0;
+
+    if (harmonize) { musicFile2 >> wavFilename >> bpm; }  // skip
 
     musicFile >> wavFilename;
     std::strcat(wavFilename, ".wav");  // add .wav
@@ -157,7 +188,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Beats per minute: " << bpm << '\n';
 
 
-    // get song data
+    // get song data 1
     char note;
     int octave;
     int numerator;
@@ -182,17 +213,56 @@ int main(int argc, char *argv[]) {
     }
     musicFile.close();
 
+    // song data 2
+    char note2;
+    int octave2;
+    int numerator2;
+    int denominator2;
+
+    double frequencies2[1024];
+    int samples2[1024];
+    int numSound2 = 0;
+    int totalSamples2 = 0;
+
+    while (musicFile2 >> note2) {
+        if (note2 != 's') {
+            musicFile2 >> octave2;
+        }
+        musicFile2 >> numerator2;
+        musicFile2 >> denominator2;
+
+        frequencies[numSound2] = getFrequency(note, octave2);
+        samples[numSound2] = getSampleCount(numerator2, denominator2, bpm, sampleRate);
+        totalSamples2 += samples2[numSound2];
+        numSound2++;
+    }
+    musicFile2.close();
+
 
     // create wav file
     std::ofstream waveFile(wavFilename, std::ios::binary);
 
     // write header
-    writeWaveHeader(waveFile, totalSamples, sampleRate);
+    if (harmonize && numSound2 > numSound) {
 
-    // write data
-    for (int i = 0; i < numSound; i++) {
-        writeData(waveFile, samples[i], frequencies[i], sampleRate);
+        // harmonize
+        writeWaveHeader(waveFile, totalSamples + totalSamples2, sampleRate);
+
+        // write data
+        for (int i = 0; i < numSound; i++) {
+            writeData(waveFile, samples2[i], frequencies[i], sampleRate, frequencies2[i], harmonize);
+        }
+    
+    } else {
+        // normal mode
+        writeWaveHeader(waveFile, totalSamples, sampleRate);
+    
+        // write data
+        for (int i = 0; i < numSound; i++) {
+            writeData(waveFile, samples[i], frequencies[i], sampleRate, frequencies2[i], harmonize);
+        }
     }
+
 
     // close
     waveFile.close();
