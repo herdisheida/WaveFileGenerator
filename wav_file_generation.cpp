@@ -106,29 +106,31 @@ int getSampleCount(int num, int den, int& bpm, unsigned int sampleRate) {
 }
 
 
-void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsigned int sampleRate, double freq2) {
+void writeData(std::ofstream& outs, unsigned int sampleCount, double freq1, unsigned int sampleRate, double freq2) {
     const double PI = 3.14159265358979323846;
 
+    for (unsigned int i = 0; i < sampleCount; ++i) {
+        double s1 = 0.0;
+        double s2 = 0.0;
 
-    for (unsigned int i = 0; i < nunSamples; i++) {
-
-        double sample = 0;
-        double sample1 = 0;
-        double sample2 = 0;
-
-        if (freq != 0.0) {
-
-            // TODO add 2.0 * because im testing í canvas þarf þá að sleppa því þar
-            sample1 = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
-
-            sample2 = std::cos(PI * freq2 * (double) i / (double) sampleRate);
-
-            sample = (sample1 + sample2) / 2;
+        if (freq1 != 0.0) {
+            s1 = std::cos(2.0 * PI * freq1 * (double) i / (double) sampleRate);
+        }
+        if (freq2 != 0.0) {
+            s2 = std::cos(2.0 * PI * freq2 * (double) i / (double) sampleRate);
         }
 
-        int s = (int) (sample * 32767.0);  // WAV only allows -32768 to 32767.
-        if (s > 32767) s = 32767;
-        if (s < -32768) s = -32768;
+        // Mix: if both active, average; if only one active, keep it.
+        double mixed;
+        if (freq1 != 0.0 && freq2 != 0.0) {
+            mixed = (s1 + s2) / 2;
+        } else {
+            mixed = (s1 + s2); // one of them is 0
+        }
+
+        int s = (int) (mixed * 32767.0);
+        if (s > 32767) s = 32767.0;
+        if (s < -32768) s = -32768.0;
 
         writeShort(outs, (short) s);
     }
@@ -147,23 +149,28 @@ int main(int argc, char *argv[]) {
     std::ifstream musicFile;
     bool harmonize = false;
 
-    // -h mode
+
+    // decide mode + open files
     if (argc == 4 && std::strcmp(argv[1], "-h") == 0) {
-        musicFile2.open(argv[3]);
-        if (!musicFile2) {
-            std::cout << "Unable to open file: " << argv[3] << "\n";
-            return 1;
-        }
+        harmonize = true;
+
         musicFile.open(argv[2]);
         if (!musicFile) {
             std::cout << "Unable to open file: " << argv[2] << "\n";
             return 1;
         }
-        harmonize = true;
-
-    }
-    
-    if (argc != 2 && std::strcmp(argv[1], "-h") != 0) {
+        musicFile2.open(argv[3]);
+        if (!musicFile2) {
+            std::cout << "Unable to open file: " << argv[3] << "\n";
+            return 1;
+        }
+    } else if (argc == 2) {
+        musicFile.open(argv[1]);
+        if (!musicFile) {
+            std::cout << "Unable to open file: " << argv[1] << "\n";
+            return 1;
+        }
+    } else {
         std::cout << "Usage:\n";
         std::cout << "  " << argv[0] << " <songA.txt>\n";
         std::cout << "  " << argv[0] << " -h <songB.txt> <songC.txt>\n";
@@ -171,99 +178,128 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (!harmonize) {
-        musicFile.open(argv[1]);
-        if (!musicFile) {
-            std::cout << "Unable to open file: " << argv[1] << "\n";
+
+    // get wav filename + bpm
+    musicFile >> wavFilename >> bpm;
+    if (!musicFile || bpm <= 0) {
+        std::cout << "Bad header in first file\n";
+        return 1;
+    }
+    std::strcat(wavFilename, ".wav");  // add .wav
+
+
+    // if harmony - read annd validate header from file2
+    int bpm2 = 0;
+    if (harmonize) {
+        char ignoreName2[33];
+        musicFile2 >> ignoreName2 >> bpm2;
+        if (!musicFile2 || bpm2 <= 0) {
+            std::cout << "Bad header in second file" << '\n';
+            return 1;
+        }
+        if (bpm2 != bpm) {
+            std::cout << "BPM mismatch between files (" << bpm << " vs " << bpm2 << ")" << '\n';
             return 1;
         }
     }
 
-
-    if (harmonize) { musicFile2 >> wavFilename >> bpm; }  // skip
-
-    musicFile >> wavFilename;
-    std::strcat(wavFilename, ".wav");  // add .wav
-
-    musicFile >> bpm;
-
     // get song data 1
-    char note;
-    int octave;
-    int numerator;
-    int denominator;
-
     double frequencies[1024];
     int samples[1024];
     int numSound = 0;
-    int totalSamples = 0;
+    unsigned int totalSamples = 0;
 
-
+    char note;
     while (musicFile >> note) {
+        int octave = 1; // default so silence doesn't use garbage
+        int numerator = 0, denominator = 0;
+
         if (note != 's') {
-            musicFile >> octave;
+            if (!(musicFile >> octave >> numerator >> denominator)) break;
+        } else {
+            if (!(musicFile >> numerator >> denominator)) break;
         }
-        musicFile >> numerator;
-        musicFile >> denominator;
+
+        if (numSound >= 1024) {
+            std::cout << "Too many events (max 1024)\n";
+            return 1;
+        }
 
         frequencies[numSound] = getFrequency(note, octave);
         samples[numSound] = getSampleCount(numerator, denominator, bpm, sampleRate);
-        totalSamples += samples[numSound];
-        numSound++;
+        totalSamples += (unsigned int)samples[numSound];
+        ++numSound;
     }
     musicFile.close();
 
-
     // song data 2
-    char note2;
-    int octave2;
-    int numerator2;
-    int denominator2;
-
     double frequencies2[1024];
     int samples2[1024];
     int numSound2 = 0;
-    int totalSamples2 = 0;
+    unsigned int totalSamples2 = 0;
 
-    while (musicFile2 >> note2) {
-        if (note2 != 's') {
-            musicFile2 >> octave2;
+    if (harmonize) {
+        char noteB;
+        while (musicFile2 >> noteB) {
+            int octaveB = 1;
+            int numeratorB = 0, denominatorB = 0;
+
+            if (noteB != 's') {
+                if (!(musicFile2 >> octaveB >> numeratorB >> denominatorB)) break;
+            } else {
+                if (!(musicFile2 >> numeratorB >> denominatorB)) break;
+            }
+
+            if (numSound2 >= 1024) {
+                std::cout << "Too many events in file2 (max 1024)\n";
+                return 1;
+            }
+
+            frequencies2[numSound2] = getFrequency(noteB, octaveB);
+            samples2[numSound2] = getSampleCount(numeratorB, denominatorB, bpm, sampleRate);
+            totalSamples2 += (unsigned int)samples2[numSound2];
+            ++numSound2;
         }
-        musicFile2 >> numerator2;
-        musicFile2 >> denominator2;
-
-        frequencies[numSound2] = getFrequency(note, octave2);
-        samples[numSound2] = getSampleCount(numerator2, denominator2, bpm, sampleRate);
-        totalSamples2 += samples2[numSound2];
-        numSound2++;
+        musicFile2.close();
     }
-    musicFile2.close();
 
+
+    // decide output length
+    unsigned int outTotal = totalSamples;
+    if (harmonize && totalSamples2 > outTotal) outTotal = totalSamples2;
 
     // create wav file
     std::ofstream waveFile(wavFilename, std::ios::binary);
-
-    // write header
-    if (harmonize && totalSamples2 > totalSamples) {
-
-        // harmonize
-        writeWaveHeader(waveFile, totalSamples2, sampleRate);
-
-        // write data
-        for (int i = 0; i < numSound2; i++) {
-            writeData(waveFile, samples2[i], frequencies[i], sampleRate, frequencies2[i]);
-        }
-    
-    } else {
-        // normal mode
-        writeWaveHeader(waveFile, totalSamples, sampleRate);
-    
-        // write data
-        for (int i = 0; i < numSound; i++) {
-            writeData(waveFile, samples[i], frequencies[i], sampleRate, frequencies2[i]);
-        }
+    if (!waveFile) {
+        std::cout << "Could not create output file" << "\n";
+        return 1;
     }
 
+    // write data
+    writeWaveHeader(waveFile, outTotal, sampleRate);
+
+    // write data
+    if (!harmonize) {
+        for (int i = 0; i < numSound; ++i) {
+            writeData(waveFile, (unsigned int) samples[i], frequencies[i], sampleRate, 0.0);
+        }
+    } else {
+        // if files differ in number of samples, the extra samples will be played alone
+        int maxEvents = (numSound > numSound2) ? numSound : numSound2;
+
+        for (int i = 0; i < maxEvents; ++i) {
+            unsigned int n1 = (i < numSound)  ? (unsigned int) samples[i]  : 0;
+            unsigned int n2 = (i < numSound2) ? (unsigned int) samples2[i] : 0;
+
+            // use max duration for this sample slot
+            unsigned int sampleCount = (n1 > n2) ? n1 : n2;
+
+            double f1 = (i < numSound)  ? frequencies[i]  : 0.0;
+            double f2 = (i < numSound2) ? frequencies2[i] : 0.0;
+
+            writeData(waveFile, sampleCount, f1, sampleRate, f2);
+        }
+    }
 
     // close
     waveFile.close();
