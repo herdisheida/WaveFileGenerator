@@ -112,14 +112,11 @@ void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsign
     for (unsigned int i = 0; i < nunSamples; i++) {
         double sample = 0;
         if (freq != 0.0) {
-            // TODO add 2.0 * because im testing í canvas þarf þá að sleppa því þar
-            sample = std::cos(PI * freq * (double) i / (double) sampleRate); // [-1,1]
+            sample = std::cos(2.0 * PI * freq * (double) i / (double) sampleRate); // [-1,1]
         }
-
         int s = (int) (sample * 32767.0);  // WAV only allows -32768 to 32767.
         if (s > 32767) s = 32767;
         if (s < -32768) s = -32768;
-
         writeShort(outs, (short) s);
     }
 }
@@ -128,28 +125,40 @@ void writeData(std::ofstream& outs, unsigned int nunSamples, double freq, unsign
 
 int main(int argc, char *argv[]) {
     const unsigned int sampleRate = 44100;    // Sample rate in Hz. (CD quality)
+    char wavFilename[512];
+    int bpm = 0;
 
-
-    // read terminal
     if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <songfile.txt>" << "\n";;
+        std::cout << "Usage: " << argv[0] << "<songfile.txt>" << '\n';
         return 1;
     }
 
     std::ifstream musicFile(argv[1]);
     if (!musicFile) {
-        std::cout << "Unable to open file: " << argv[1] << "\n";
+        std::cout << "Unable to open file: " << argv[1] << '\n';
         return 1;
     }
 
     // get song header
-    char wavFilename[37]; // 32 + "".wav" + '\n'
-    int bpm = 0;
-
     musicFile >> wavFilename;
-    std::strcat(wavFilename, ".wav");  // add .wav
-    
     musicFile >> bpm;
+
+
+    int nameLength = strlen(wavFilename);
+    if (
+        nameLength > 32 || (
+        wavFilename[nameLength - 1] == 'v' &&
+        wavFilename[nameLength - 2] == 'a' &&
+        wavFilename[nameLength - 3] == 'w' &&
+        wavFilename[nameLength - 4] == '.'
+        )
+    ) {
+        std::cout << "Incorrect WAV filename format:" << '\n';
+        std::cout << "  32 char max, don't write the file extension (.wav)" << '\n';
+        return 1;   
+    }
+
+    std::strcat(wavFilename, ".wav");  // add .wav
 
     // get song data
     char note;
@@ -179,18 +188,14 @@ int main(int argc, char *argv[]) {
 
     // create wav file
     std::ofstream waveFile(wavFilename, std::ios::binary);
+    writeWaveHeader(waveFile, totalSamples, sampleRate); // header
 
-    // write header
-    writeWaveHeader(waveFile, totalSamples, sampleRate);
-
-    // write data
     for (int i = 0; i < numSound; i++) {
-        writeData(waveFile, samples[i], frequencies[i], sampleRate);
+        writeData(waveFile, samples[i], frequencies[i], sampleRate); // data (Hz frequencies)
     }
 
-    // close
     waveFile.close();
-    std::cout << "WAV file created: " << wavFilename << "\n";
+    std::cout << "WAV file created: " << wavFilename << '\n';
     return 0;
 }
     
